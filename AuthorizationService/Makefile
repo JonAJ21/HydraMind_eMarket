@@ -24,3 +24,7 @@ app-shell:
 .PHONY: app-logs
 app-logs:
 	${LOGS} ${APP_CONTAINER} -f
+
+.PHONY: app-test
+app-test:
+	${EXEC} ${APP_CONTAINER} pytest

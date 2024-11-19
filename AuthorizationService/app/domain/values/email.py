@@ -10,7 +10,7 @@ class Email(BaseValueObject):
     value: str
     
     def validate(self):
-        if len(self.value) > 255:
+        if len(self.value) > 128:
             raise EmailTooLongException(self.value)
         if not self.value:
             raise EmailIsEmptyException(self.value)

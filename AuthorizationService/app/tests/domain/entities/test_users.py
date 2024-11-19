@@ -1,5 +1,7 @@
 import pytest
 
+from domain.events.users import NewUserAddedEvent
+from domain.entities.users import Users
 from domain.exceptions.role import RoleIsIncorrectException
 from domain.values.role import Role
 from domain.exceptions.email import EmailTooLongException
@@ -47,9 +49,40 @@ def test_create_role_incorrect():
         role = Role('r')
 
 def test_create_user():
-    user = User(login='login', password='password', email='email', role='CUSTOMER')
+    user = User(login='login',
+                password='password',
+                email='email',
+                role='CUSTOMER')
     assert user.login == 'login'
     assert user.password == 'password'
     assert user.email == 'email'
     assert user.role == 'CUSTOMER'
+    
+def test_add_user_to_users():
+    user = User(login='login',
+                password='password',
+                email='email',
+                role='CUSTOMER')
+    users = Users()
+    users.add_user(user=user)
+    assert user in users.users
+    
+def test_new_user_events():
+    user = User(login='login',
+                password='password',
+                email='email',
+                role='CUSTOMER')
+
+    users = Users()
+    users.add_user(user=user)
+    events = users.pull_events()
+    pulled_events = users.pull_events()
+    assert not pulled_events, pulled_events
+    assert len(events) == 1, events
+    
+    new_event = events[0]
+    
+    assert isinstance(new_event, NewUserAddedEvent), new_event
+    assert new_event.user == user
+
     
