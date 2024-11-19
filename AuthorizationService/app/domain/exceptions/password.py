@@ -3,18 +3,17 @@ from dataclasses import dataclass
 from domain.exceptions.base import ApplicationException
 
 @dataclass(eq=False)
-class UserEmailTooLongException(ApplicationException):
+class PasswordTooLongException(ApplicationException):
     text: str
     
     @property
     def message(self):
-        return f'Too long user email: "{self.text[:255]}..."'
+        return f'Too long user password: "{self.text[:64]}..."'
     
-
-
+    
 @dataclass(eq=False)
-class UserEmailIsEmptyException(ApplicationException):
+class PasswordIsEmptyException(ApplicationException):
 
     @property
     def message(self):
-        return 'Email is empty'
+        return 'Password is empty'

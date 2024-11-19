@@ -4,7 +4,6 @@ from domain.exceptions.login import LoginIsEmptyException, LoginTooLongException
 from domain.values.base import BaseValueObject
 
 
-
 @dataclass(frozen=True)
 class Login(BaseValueObject):
     value: str

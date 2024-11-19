@@ -3,17 +3,17 @@ from dataclasses import dataclass
 from domain.exceptions.base import ApplicationException
 
 @dataclass(eq=False)
-class PasswordTooLongException(ApplicationException):
+class LoginTooLongException(ApplicationException):
     text: str
     
     @property
     def message(self):
-        return f'Too long user password: "{self.text[:255]}..."'
+        return f'Too long user login: "{self.text[:52]}..."'
     
     
 @dataclass(eq=False)
-class PasswordIsEmptyException(ApplicationException):
+class LoginIsEmptyException(ApplicationException):
 
     @property
     def message(self):
-        return 'Password is empty'
+        return 'Login is empty'

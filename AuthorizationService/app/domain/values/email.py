@@ -1,6 +1,5 @@
 from dataclasses import dataclass
 
-
 from domain.exceptions.email import EmailIsEmptyException, EmailTooLongException
 from domain.values.base import BaseValueObject
 

@@ -9,7 +9,6 @@ class BaseValueObject(ABC, Generic[VT]):
     value: VT
 
     def __post_init__(self):
-        print("init")
         self.validate()
     
     @abstractmethod
