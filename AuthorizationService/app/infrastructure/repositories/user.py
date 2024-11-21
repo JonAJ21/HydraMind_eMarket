@@ -6,11 +6,11 @@ from domain.entities.user import User
 @dataclass
 class BaseUsersRepository(ABC):
     @abstractmethod
-    def check_user_exists_by_email(self, email: str) -> bool:
+    async def check_user_exists_by_email(self, email: str) -> bool:
         ...
         
     @abstractmethod
-    def add_user(self, user: User) -> None:
+    async def add_user(self, user: User) -> None:
         ...
         
         
@@ -21,13 +21,13 @@ class MemoryUsersRepository(ABC):
         kw_only=True
     )
     
-    def check_user_exists_by_email(self, email: str) -> bool:
+    async def check_user_exists_by_email(self, email: str) -> bool:
         try:
             return bool(next(
-                user for user in self._saved_users if user.email == email
+                user for user in self._saved_users if user.email.as_generic_type() == email
             ))
         except StopIteration:
             return False
         
-    def add_user(self, user: User) -> None:
+    async def add_user(self, user: User) -> None:
         self._saved_users.append(user)
