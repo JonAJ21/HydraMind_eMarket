@@ -1,11 +1,15 @@
 from fastapi import FastAPI
 
-# from common.settings import settings
+from application.api.user.handlers import router as message_router
 
-def create_app():
-    return FastAPI(
+
+def create_app() -> FastAPI:
+    app = FastAPI(
         title='AuthorizationService',
         docs_url='/api/docs',
         description='Service for authorization'
-        # debug=settings.debug,
     )
+    
+    app.include_router(message_router, prefix='/chat')
+    
+    return app

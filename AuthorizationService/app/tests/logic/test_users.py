@@ -1,6 +1,6 @@
 import pytest
 
-# from faker import Faker
+from punq import Container
 
 from logic.exceptions.user import UserWithThatEmailAlreadyExistsException
 from domain.values.email import Email
@@ -19,11 +19,11 @@ async def test_add_user_command_succes(
 ):    
     
     # TODO: faker for random text generation
-    user: User = (await mediator.handle_command(
+    user, *_ = await mediator.handle_command(
         AddUserCommand(
             login='login', password='password',
             email='email', role="CUSTOMER"
-    )))[0]
+    ))
     
     assert await users_repository.check_user_exists_by_email(email=user.email.as_generic_type())
     assert await (users_repository.check_user_exists_by_email(email='emai')) == False

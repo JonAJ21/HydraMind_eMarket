@@ -1,16 +1,21 @@
 from pytest import fixture
 
-from logic.init import init_mediator
+from punq import Container
+
+
+from tests.fixtures import init_dummy_container
 from logic.mediator import Mediator
 from infrastructure.repositories.user import BaseUsersRepository, MemoryUsersRepository
 
 
 @fixture(scope='function')
-def users_repository() -> MemoryUsersRepository:
-    return MemoryUsersRepository()
+def container() -> Container:
+    return init_dummy_container()
 
 @fixture(scope='function')
-def mediator(users_repository: BaseUsersRepository) -> Mediator:
-    mediator = Mediator()
-    init_mediator(mediator, users_repository)
-    return mediator
+def mediator(container: Container) -> Mediator:
+    return container.resolve(Mediator)
+
+@fixture(scope='function')
+def users_repository(container: Container) -> BaseUsersRepository:
+    return container.resolve(BaseUsersRepository)
