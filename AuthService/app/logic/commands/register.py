@@ -16,7 +16,7 @@ class RegisterUserCommandHandler(CommandHandler[RegisterUserCommand, User]):
     users_repository: BaseUsersRepository
     
     async def handle(self, command: RegisterUserCommand) -> User:
-        if await self.users_repository.check_user_exists_by_login(command.login):
+        if await self.users_repository.get_user(command.login) is not None:
             raise UserLoginAlreadyExistsException(command.login)
         
         user = User.register_user(

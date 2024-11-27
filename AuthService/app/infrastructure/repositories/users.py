@@ -6,7 +6,7 @@ from domain.entities.user import User
 @dataclass
 class BaseUsersRepository(ABC):
     @abstractmethod
-    async def check_user_exists_by_email(self, email: str) -> bool:
+    async def get_user(self, login: str) -> User | None:
         ...
         
     @abstractmethod
@@ -20,14 +20,12 @@ class MemoryUsersRepository(ABC):
         default_factory=list,
         kw_only=True
     )
-    
-    async def check_user_exists_by_login(self, login: str) -> bool:
-        try:
-            return bool(next(
-                user for user in self._saved_users if user.login.as_generic_type() == login
-            ))
-        except StopIteration:
-            return False
+        
+    async def get_user(self, login: str) -> User | None:
+        for user in self._saved_users:
+            if user.login.as_generic_type() == login:
+                return user
+        return None
         
     async def register_user(self, user: User) -> None:
         self._saved_users.append(user)
