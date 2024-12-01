@@ -4,6 +4,7 @@ from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials, OAuth2Pas
 from jwt import InvalidTokenError
 
 
+from logic.commands.refresh import RefreshTokenCommand
 from logic.queries.user import GetUserInfoQuery
 from logic.commands.login import LoginUserCommand
 from domain.exceptions.base import ApplicationException
@@ -11,7 +12,7 @@ from logic.commands.register import RegisterUserCommand
 from logic.mediator import Mediator
 from logic.init import init_container
 from application.api.v1.schemas import ErrorSchema
-from application.api.v1.auth.schemas import GetUserInfoResponseSchema, LoginUserResponseSchema, RegisterUserRequestSchema, RegisterUserResponseSchema
+from application.api.v1.auth.schemas import GetUserInfoResponseSchema, LoginUserResponseSchema, RefreshTokenResponseSchema, RegisterUserRequestSchema, RegisterUserResponseSchema
 
 http_bearer = HTTPBearer(auto_error=False)
 
@@ -85,25 +86,25 @@ async def login_user_handler(
 
 @router.post(
     '/refresh',
-    response_model=LoginUserResponseSchema,
+    response_model=RefreshTokenResponseSchema,
+    response_model_exclude_none=True,
     status_code=status.HTTP_201_CREATED,
-    description='Login user',
+    description='Refresh token',
     responses={
         status.HTTP_400_BAD_REQUEST: {'model': ErrorSchema}
     }
 )
 async def auth_refresh_jwt_handler(
-    username: Annotated[str, Form()],
-    password: Annotated[str, Form()],
-    container=Depends(init_container)):
-    '''Login user'''
+    credentials: Annotated[HTTPAuthorizationCredentials, Depends(http_bearer)],
+    container=Depends(init_container),
+    ):
+    '''Refresh token'''
     mediator: Mediator = container.resolve(Mediator)
-    
+        
     try:
         tokenInfo, *_ = await mediator.handle_command(
-            LoginUserCommand(
-                login=username,
-                password=password
+            RefreshTokenCommand(
+                token=credentials.credentials
         ))
     except ApplicationException as exception:
         raise HTTPException(
@@ -111,7 +112,7 @@ async def auth_refresh_jwt_handler(
             detail={'error': exception.message}
         )
         
-    return LoginUserResponseSchema.from_entity(tokenInfo)
+    return RefreshTokenResponseSchema.from_entity(tokenInfo)
 
 
 

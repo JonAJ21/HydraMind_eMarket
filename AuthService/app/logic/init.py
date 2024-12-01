@@ -2,6 +2,7 @@ from functools import lru_cache
 from fastapi.security import HTTPBearer
 from punq import Container, Scope
 
+from logic.commands.refresh import RefreshTokenCommand, RefreshTokenCommandHandler
 from logic.services.user import BaseUserService, JWTUserService
 from logic.services.auth import BaseAuthService, JWTAuthService
 from logic.queries.user import GetUserInfoQuery, GetUserInfoQueryHandler
@@ -24,7 +25,10 @@ def _init_container() -> Container:
     
     container.register(RegisterUserCommandHandler)
     container.register(LoginUserCommandHandler)
+    container.register(RefreshTokenCommandHandler)
+    
     container.register(GetUserInfoQueryHandler)
+    
     
     def init_mediator():
         mediator = Mediator()
@@ -36,6 +40,11 @@ def _init_container() -> Container:
             LoginUserCommand,
             [container.resolve(LoginUserCommandHandler)]
         )
+        mediator.register_command(
+            RefreshTokenCommand,
+            [container.resolve(RefreshTokenCommandHandler)]
+        )
+        
         mediator.register_query(
             GetUserInfoQuery,
             [container.resolve(GetUserInfoQueryHandler)]

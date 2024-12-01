@@ -2,6 +2,7 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from typing import Any, Dict
 
+from logic.services.user import BaseUserService
 from domain.entities.user import User
 from settings.config import settings
 from logic.exceptions.auth import InactiveUserException, IncorrectPasswordException, InvalidTokenTypeException, UserDoesNotExistException, UserLoginAlreadyExistsException
@@ -12,21 +13,43 @@ from logic.services.jwt import JWT, TokenInfo
 class BaseAuthService(ABC):
     
     @abstractmethod
+    async def validate_auth(self, login: str, password: str) -> User:
+        ...
+    
+    @abstractmethod
     async def register(self, login: str, password: str) -> User:
+        ...
+    
+    @abstractmethod
+    async def create_token(self, user: User, token_type: str) -> str:
         ...
     
     @abstractmethod
     async def login(self, login: str, password: str) -> TokenInfo:
         ...
-
-    # @abstractmethod
-    # async def get_user_by_token(self, token: str) -> User:
-    #     ...
+    
+    @abstractmethod
+    async def refresh(self, token: str) -> TokenInfo:
+        ...
         
         
 @dataclass
 class JWTAuthService(BaseAuthService):
     users_repository: BaseUsersRepository
+    users_service: BaseUserService
+    
+    async def validate_auth(self, login: str, password: str) -> User:
+        user = await self.users_repository.get_user(login)
+        
+        if user is None:
+            raise UserDoesNotExistException(login)
+        if user.password != str.encode(password):
+            raise IncorrectPasswordException(password)
+        if not user.active:
+            raise InactiveUserException(login)
+        
+        return user
+        
     
     async def register(self, login: str, password: str) -> User:
         if await self.users_repository.get_user(login) is not None:
@@ -44,17 +67,10 @@ class JWTAuthService(BaseAuthService):
         
         return user
     
-    async def login(self, login: str, password: str) -> TokenInfo:
-        user = await self.users_repository.get_user(login)
-        
-        if user is None:
-            raise UserDoesNotExistException(login)
-        if user.password != str.encode(password):
-            raise IncorrectPasswordException(password)
-        if not user.active:
-            raise InactiveUserException(login)
-        
-        #TODO read events
+    
+    async def create_token(self, user: User, token_type: str) -> str:
+        if token_type not in ['access', 'refresh']:
+            raise InvalidTokenTypeException(token_type=token_type)
         
         jwt_payload: Dict[str, Any] = {
             'sub': user.login.as_generic_type(),
@@ -62,39 +78,38 @@ class JWTAuthService(BaseAuthService):
             'oid': user.oid
         }
         
-        access_jwt_payload = jwt_payload.copy()
-        refresh_jwt_payload = jwt_payload.copy()
+        jwt_payload = jwt_payload.copy()
+        jwt_payload['type'] = token_type
         
-        access_jwt_payload['type'] = 'access'
-        refresh_jwt_payload['type'] = 'refresh'
-        
-        access_token = JWT.encode(
-            access_jwt_payload,
-            expire_minutes=settings.auth_jwt.access_token_expire_minutes
-        )
-        refresh_token = JWT.encode(
-            refresh_jwt_payload,
+        if token_type == 'access':
+            return JWT.encode(
+                jwt_payload,
+                expire_minutes=settings.auth_jwt.access_token_expire_minutes
+            ) 
+        return JWT.encode(
+            jwt_payload,
             expire_minutes=settings.auth_jwt.refresh_token_expire_minutes
         )
+    
+    
+    async def login(self, login: str, password: str) -> TokenInfo:
+        
+        user = await self.validate_auth(login=login, password=password)    
+        
+        #TODO read events
            
         return TokenInfo(
-            access_token=access_token,
-            refresh_token=refresh_token
+            access_token=await self.create_token(user=user, token_type='access'),
+            refresh_token=await self.create_token(user=user, token_type='refresh')
         )
         
-    # async def get_user_by_token(self, token: str) -> User:
-    #     payload: dict = JWT.decode(
-    #         token=token
-    #     )
-    #     token_type = payload.get('type')
-    #     if token_type != 'access':
-    #         raise InvalidTokenTypeException(token_type)
+    async def refresh(self, token: str) -> TokenInfo:
+        user = await self.users_service.get_user_by_token(token=token, token_type='refresh')
         
-    #     login: str | None = payload.get('sub')
-
-    #     user: User | None = await self.users_repository.get_user(login)
+        return TokenInfo(
+            access_token=await self.create_token(user=user, token_type='access')
+        )
         
-    #     if not user:
-    #         raise UserDoesNotExistException(login)
         
-    #     return user
+        
+            

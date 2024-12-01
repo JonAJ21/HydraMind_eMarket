@@ -43,7 +43,7 @@ class RegisterUserResponseSchema(BaseModel):
 class LoginUserResponseSchema(BaseModel):
     access_token: str
     refresh_token: str
-    token_type: str
+    token_type: str = 'Bearer'
     
     @classmethod
     def from_entity(cls, tokenInfo: TokenInfo) -> 'LoginUserResponseSchema':
@@ -55,8 +55,8 @@ class LoginUserResponseSchema(BaseModel):
     
 class RefreshTokenResponseSchema(BaseModel):
     access_token: str
-    refresh_token: str
-    token_type: str
+    refresh_token: str | None = None
+    token_type: str = 'Bearer'
     
     @classmethod
     def from_entity(cls, tokenInfo: TokenInfo) -> 'RefreshTokenResponseSchema':
@@ -98,5 +98,6 @@ class GetUserInfoResponseSchema(BaseModel):
             role=user.role.as_generic_type(),
             active=user.active
         )
+    
     
        

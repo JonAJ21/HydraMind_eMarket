@@ -1,7 +1,5 @@
 from datetime import datetime, timedelta, timezone
-from typing import Any, Dict
 import jwt
-from copy import deepcopy
 
 from dataclasses import dataclass
 
@@ -11,15 +9,8 @@ from settings.config import settings
 @dataclass(frozen=True)
 class TokenInfo:
     access_token: str
-    refresh_token: str
+    refresh_token: str | None = None
     token_type: str = 'Bearer'
-    
-# @dataclass(frozen=True)
-# class JWTPayload:
-#     sub: str
-#     exp: datetime | None = None
-#     iat: datetime | None = None
-
 
 @dataclass(eq=False)
 class JWT:

@@ -25,7 +25,7 @@ class IncorrectPasswordException(LogicException):
     
     @property
     def message(self):
-        f'Incorrect password: {self.password}'
+        return f'Incorrect password: {self.password}'
 
 @dataclass(eq=False)    
 class InactiveUserException(LogicException):
@@ -33,7 +33,7 @@ class InactiveUserException(LogicException):
     
     @property
     def message(self):
-        f'{self.password} is inactive user'
+        return f'{self.login} is inactive user'
         
 @dataclass(eq=False)    
 class InvalidTokenTypeException(LogicException):
@@ -41,4 +41,10 @@ class InvalidTokenTypeException(LogicException):
     
     @property
     def message(self):
-        f'Invalid token type "{self.token_type}" expected "success"'
+        if self.token_type == 'access':
+            return f'Invalid token type "{self.token_type}" expected "refresh"'
+        if self.token_type == 'refresh':
+            return f'Invalid token type "{self.token_type}" expected "access"'
+        
+        return f'Invalid token type "{self.token_type}". It must be "access" or "refresh"'
+    

@@ -11,19 +11,24 @@ from domain.entities.user import User
 class BaseUserService(ABC):
     
     @abstractmethod
-    async def get_user_by_token(self, token: str) -> User:
+    async def get_user_by_token(self, token: str, token_type: str) -> User:
         ...
         
 @dataclass
 class JWTUserService(BaseUserService):
     users_repository: BaseUsersRepository
-    async def get_user_by_token(self, token) -> User:
+    
+    async def get_user_by_token(self, token: str, token_type: str) -> User:
+        if token_type not in ['access', 'refresh']:
+            raise InvalidTokenTypeException(token_type)
+        
         payload: dict = JWT.decode(
             token=token
         )
-        token_type = payload.get('type')
-        if token_type != 'access':
-            raise InvalidTokenTypeException(token_type)
+        
+        payload_token_type = payload.get('type')
+        if payload_token_type != token_type:
+            raise InvalidTokenTypeException(payload_token_type)
         
         login: str | None = payload.get('sub')
 
@@ -33,3 +38,5 @@ class JWTUserService(BaseUserService):
             raise UserDoesNotExistException(login)
         
         return user
+        
+        
