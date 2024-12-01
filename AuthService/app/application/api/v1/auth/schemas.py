@@ -1,4 +1,3 @@
-from datetime import datetime
 from tokenize import TokenInfo
 from pydantic import BaseModel
 
@@ -8,7 +7,6 @@ from domain.entities.user import User
 class RegisterUserRequestSchema(BaseModel):
     login: str
     password: str
-    role: str
     
 class RegisterUserResponseSchema(BaseModel):
     oid: str
@@ -38,21 +36,37 @@ class RegisterUserResponseSchema(BaseModel):
             active=user.active
         )
         
-class LoginUserRequestSchema(BaseModel):
-    login: str
-    password: str
+# class LoginUserRequestSchema(BaseModel):
+#     login: str
+#     password: str
     
 class LoginUserResponseSchema(BaseModel):
     access_token: str
+    refresh_token: str
     token_type: str
     
     @classmethod
     def from_entity(cls, tokenInfo: TokenInfo) -> 'LoginUserResponseSchema':
         return LoginUserResponseSchema(
             access_token=tokenInfo.access_token,
+            refresh_token=tokenInfo.refresh_token,
             token_type=tokenInfo.token_type
         )
     
+class RefreshTokenResponseSchema(BaseModel):
+    access_token: str
+    refresh_token: str
+    token_type: str
+    
+    @classmethod
+    def from_entity(cls, tokenInfo: TokenInfo) -> 'RefreshTokenResponseSchema':
+        return RefreshTokenResponseSchema(
+            access_token=tokenInfo.access_token,
+            refresh_token=tokenInfo.refresh_token,
+            token_type=tokenInfo.token_type
+        )
+
+
 
 class GetUserInfoRequestSchema(BaseModel):
     ...

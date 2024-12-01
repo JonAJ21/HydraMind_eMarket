@@ -80,5 +80,3 @@ def test_register_user():
     assert user.role == Role('CUSTOMER')
     assert user.active == True
     
-
-    

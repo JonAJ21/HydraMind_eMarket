@@ -34,3 +34,11 @@ class InactiveUserException(LogicException):
     @property
     def message(self):
         f'{self.password} is inactive user'
+        
+@dataclass(eq=False)    
+class InvalidTokenTypeException(LogicException):
+    token_type: str
+    
+    @property
+    def message(self):
+        f'Invalid token type "{self.token_type}" expected "success"'

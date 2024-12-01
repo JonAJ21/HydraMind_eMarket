@@ -1,9 +1,9 @@
 from dataclasses import dataclass
 from typing import Any
 
-from logic.jwt import JWT
+from logic.services.user import BaseUserService
 from logic.queries.base import BaseQuery, QueryHandler
-from logic.exceptions.auth import UserDoesNotExistException, UserLoginAlreadyExistsException
+from logic.exceptions.auth import InvalidTokenTypeException, UserDoesNotExistException, UserLoginAlreadyExistsException
 from infrastructure.repositories.users import BaseUsersRepository
 from domain.entities.user import User
 
@@ -14,17 +14,7 @@ class GetUserInfoQuery(BaseQuery):
 @dataclass(frozen=True)
 class GetUserInfoQueryHandler(QueryHandler[GetUserInfoQuery, User]):
     users_repository: BaseUsersRepository
+    users_service: BaseUserService
     
     async def handle(self, query: GetUserInfoQuery) -> User:
-        payload: dict = JWT.decode(
-            token=query.token
-        )
-        print(query.token)
-        login: str | None = payload.get('sub')
-        
-        user: User | None = await self.users_repository.get_user(login)
-        
-        if not user:
-            raise UserDoesNotExistException(query.login)
-        
-        return user
+        return await self.users_service.get_user_by_token(query.token)

@@ -11,13 +11,14 @@ from settings.config import settings
 @dataclass(frozen=True)
 class TokenInfo:
     access_token: str
-    token_type: str
+    refresh_token: str
+    token_type: str = 'Bearer'
     
-@dataclass(frozen=True)
-class JWTPayload:
-    sub: str
-    exp: datetime | None = None
-    iat: datetime | None = None
+# @dataclass(frozen=True)
+# class JWTPayload:
+#     sub: str
+#     exp: datetime | None = None
+#     iat: datetime | None = None
 
 
 @dataclass(eq=False)
@@ -62,6 +63,8 @@ class JWT:
             key=public_key,
             algorithms=[algorithm]
         )
+        
+    
     
     
     

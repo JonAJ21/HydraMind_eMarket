@@ -11,15 +11,17 @@ from logic.commands.register import RegisterUserCommand
 from logic.mediator import Mediator
 from logic.init import init_container
 from application.api.v1.schemas import ErrorSchema
-from application.api.v1.auth.schemas import GetUserInfoRequestSchema, GetUserInfoResponseSchema, LoginUserRequestSchema, LoginUserResponseSchema, RegisterUserRequestSchema, RegisterUserResponseSchema
+from application.api.v1.auth.schemas import GetUserInfoResponseSchema, LoginUserResponseSchema, RegisterUserRequestSchema, RegisterUserResponseSchema
 
-# http_bearer = HTTPBearer()
+http_bearer = HTTPBearer(auto_error=False)
+
 oauth2_bearer = OAuth2PasswordBearer(
     tokenUrl='/auth/login'
 )
 
 router = APIRouter(
-    tags=['Auth']
+    tags=['Auth'],
+    dependencies=[Depends(http_bearer)]
 )
 
 @router.post(
@@ -42,7 +44,6 @@ async def register_user_handler(schema: RegisterUserRequestSchema, container=Dep
             RegisterUserCommand(
                 login=schema.login,
                 password=schema.password,
-                role=schema.role
         ))
     except ApplicationException as exception:
         raise HTTPException(
@@ -58,7 +59,6 @@ async def register_user_handler(schema: RegisterUserRequestSchema, container=Dep
     status_code=status.HTTP_201_CREATED,
     description='Login user',
     responses={
-        # status.HTTP_200_OK: {'model': LoginUserRequestSchema },
         status.HTTP_400_BAD_REQUEST: {'model': ErrorSchema}
     }
 )
@@ -67,7 +67,36 @@ async def login_user_handler(
     password: Annotated[str, Form()],
     container=Depends(init_container)):
     '''Login user'''
-    print(username, password)
+    mediator: Mediator = container.resolve(Mediator)
+    
+    try:
+        tokenInfo, *_ = await mediator.handle_command(
+            LoginUserCommand(
+                login=username,
+                password=password
+        ))
+    except ApplicationException as exception:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail={'error': exception.message}
+        )
+        
+    return LoginUserResponseSchema.from_entity(tokenInfo)
+
+@router.post(
+    '/refresh',
+    response_model=LoginUserResponseSchema,
+    status_code=status.HTTP_201_CREATED,
+    description='Login user',
+    responses={
+        status.HTTP_400_BAD_REQUEST: {'model': ErrorSchema}
+    }
+)
+async def auth_refresh_jwt_handler(
+    username: Annotated[str, Form()],
+    password: Annotated[str, Form()],
+    container=Depends(init_container)):
+    '''Login user'''
     mediator: Mediator = container.resolve(Mediator)
     
     try:
@@ -89,33 +118,23 @@ async def login_user_handler(
 @router.get(
     '/user/info',
     response_model=GetUserInfoResponseSchema,
-    status_code=status.HTTP_201_CREATED,
+    status_code=status.HTTP_200_OK,
     description='User info',
     responses={
         status.HTTP_400_BAD_REQUEST: {'model': ErrorSchema}
     }
 )
 async def get_user_info_handler(
-    # schema: GetUserInfoRequestSchema,
     container = Depends(init_container),
-    # credentials: HTTPAuthorizationCredentials = Depends(http_bearer)
     token: str = Depends(oauth2_bearer)
 ):
     '''User info'''
-    
-    # try: 
-    #     token = credentials.credentials
-    # except InvalidTokenError as exception:
-    #     raise HTTPException(
-    #         status_code=status.HTTP_401_UNAUTHORIZED,
-    #         detail={'error': exception.message}
-    #     )
-        
+
     mediator: Mediator = container.resolve(Mediator)
     try:
         user, *_ = await mediator.handle_query(
             GetUserInfoQuery(
-                token=token#credentials.credentials
+                token=token
         ))
     except ApplicationException as exception:
         raise HTTPException(
@@ -127,7 +146,6 @@ async def get_user_info_handler(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail=f'Invalid token error. {exception}'
         )
-        
         
     return GetUserInfoResponseSchema.from_entity(user)
     

@@ -2,6 +2,8 @@ from functools import lru_cache
 from fastapi.security import HTTPBearer
 from punq import Container, Scope
 
+from logic.services.user import BaseUserService, JWTUserService
+from logic.services.auth import BaseAuthService, JWTAuthService
 from logic.queries.user import GetUserInfoQuery, GetUserInfoQueryHandler
 from logic.commands.login import LoginUserCommand, LoginUserCommandHandler
 from logic.commands.register import RegisterUserCommand, RegisterUserCommandHandler
@@ -17,6 +19,8 @@ def _init_container() -> Container:
     container = Container()
     
     container.register(BaseUsersRepository, MemoryUsersRepository, scope=Scope.singleton)
+    container.register(BaseAuthService, JWTAuthService, scope=Scope.singleton)
+    container.register(BaseUserService, JWTUserService, scope=Scope.singleton)
     
     container.register(RegisterUserCommandHandler)
     container.register(LoginUserCommandHandler)
