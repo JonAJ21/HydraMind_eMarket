@@ -12,7 +12,6 @@ class GetUserInfoQuery(BaseQuery):
     
 @dataclass(frozen=True)
 class GetUserInfoQueryHandler(QueryHandler[GetUserInfoQuery, User]):
-    #users_repository: BaseUsersRepository
     users_service: BaseUserService
     
     async def handle(self, query: GetUserInfoQuery) -> User:

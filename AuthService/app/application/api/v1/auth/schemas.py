@@ -42,7 +42,7 @@ class RegisterUserResponseSchema(BaseModel):
     
 class LoginUserResponseSchema(BaseModel):
     access_token: str
-    refresh_token: str
+    refresh_token: str | None = None
     token_type: str = 'Bearer'
     
     @classmethod

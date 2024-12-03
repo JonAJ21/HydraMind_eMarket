@@ -2,8 +2,8 @@ DC = docker-compose
 EXEC = docker exec -it
 LOGS = docker logs
 ENV = --env-file docker-compose/.env
-APP_FILE = docker-compose/app.yaml
-APP_CONTAINER = auth-service
+APP_FILE = docker-compose/database.yaml
+APP_CONTAINER = db-container
 
 .PHONY: app
 app:
@@ -24,7 +24,3 @@ app-shell:
 .PHONY: app-logs
 app-logs:
 	${LOGS} ${APP_CONTAINER} -f
-
-.PHONY: app-test
-app-test:
-	${EXEC} ${APP_CONTAINER} pytest
