@@ -15,7 +15,7 @@ class BaseUsersRepository(ABC):
         
         
 @dataclass
-class MemoryUsersRepository(ABC):
+class MemoryUsersRepository(BaseUsersRepository):
     _saved_users: list[User] = field(
         default_factory=list,
         kw_only=True
@@ -29,3 +29,7 @@ class MemoryUsersRepository(ABC):
         
     async def register_user(self, user: User) -> None:
         self._saved_users.append(user)
+        
+@dataclass
+class PostgreUsersRepository(BaseUsersRepository):
+    ...
