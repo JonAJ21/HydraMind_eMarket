@@ -9,7 +9,7 @@ services:
       - ../app:/app/
     ports:
       - "${API_PORT}:8000"
-    # env_file: "../.env"
+    env_file: ".env"
     
     restart: always
     networks:

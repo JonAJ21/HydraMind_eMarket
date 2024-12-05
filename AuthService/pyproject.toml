@@ -20,6 +20,8 @@ pydantic-settings = "^2.6.1"
 bcrypt = "^4.2.1"
 python-multipart = "^0.0.17"
 asyncpg = "^0.30.0"
+django-environ = "^0.11.2"
+nest-asyncio = "^1.6.0"
 
 
 [build-system]

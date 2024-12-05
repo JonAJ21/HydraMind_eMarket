@@ -37,7 +37,7 @@ router = APIRouter(
 )
 async def register_user_handler(schema: RegisterUserRequestSchema, container=Depends(init_container)):
     '''Register new user'''
-    
+    # container = await init_container()
     mediator: Mediator = container.resolve(Mediator)
     
     try:
@@ -111,6 +111,11 @@ async def auth_refresh_jwt_handler(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
             detail={'error': exception.message}
         )
+    except AttributeError as exception:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail={'error': 'Did not authorize'}
+        )
         
     return RefreshTokenResponseSchema.from_entity(tokenInfo)
 
@@ -130,7 +135,7 @@ async def get_user_info_handler(
     token: str = Depends(oauth2_bearer)
 ):
     '''User info'''
-
+    print(token)
     mediator: Mediator = container.resolve(Mediator)
     try:
         user, *_ = await mediator.handle_query(

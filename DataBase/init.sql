@@ -4,7 +4,5 @@ CREATE TABLE users (
 	password VARCHAR(60),
 	email VARCHAR(128),
 	role VARCHAR(8),
-	active BOOLEAN,
-    new BOOLEAN
+	active BOOLEAN
 );
-

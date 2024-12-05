@@ -63,8 +63,7 @@ class JWTAuthService(BaseAuthService):
         
         # TODO: read events
         
-        await self.users_repository.register_user(user)
-        
+        await self.users_repository.register_user(user)        
         return user
     
     
@@ -109,7 +108,5 @@ class JWTAuthService(BaseAuthService):
         return TokenInfo(
             access_token=await self.create_token(user=user, token_type='access')
         )
-        
-        
         
             

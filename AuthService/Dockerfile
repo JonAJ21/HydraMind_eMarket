@@ -11,6 +11,7 @@ RUN apt update -y && \
     musl-dev
 
 ADD pyproject.toml /app
+# ADD ./docker-compose/.env /app/env
 
 RUN pip install --upgrade pip
 RUN pip install poetry
