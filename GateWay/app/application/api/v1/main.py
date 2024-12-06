@@ -9,6 +9,7 @@ def create_app() -> FastAPI:
         docs_url='/api/docs',
         description='Gateway'
     )    
+    
     app.include_router(auth_router, prefix='/auth')
     app.include_router(user_router, prefix='/user')
     
