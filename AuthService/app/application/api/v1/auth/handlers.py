@@ -12,7 +12,7 @@ from logic.commands.register import RegisterUserCommand
 from logic.mediator import Mediator
 from logic.init import init_container
 from application.api.v1.schemas import ErrorSchema
-from application.api.v1.auth.schemas import GetUserInfoResponseSchema, LoginUserResponseSchema, RefreshTokenResponseSchema, RegisterUserRequestSchema, RegisterUserResponseSchema
+from application.api.v1.auth.schemas import GetUserInfoRequestSchema, GetUserInfoResponseSchema, LoginUserRequestSchema, LoginUserResponseSchema, RefreshTokenRequestSchema, RefreshTokenResponseSchema, RegisterUserRequestSchema, RegisterUserResponseSchema
 
 http_bearer = HTTPBearer(auto_error=False)
 
@@ -64,17 +64,19 @@ async def register_user_handler(schema: RegisterUserRequestSchema, container=Dep
     }
 )
 async def login_user_handler(
-    username: Annotated[str, Form()],
-    password: Annotated[str, Form()],
-    container=Depends(init_container)):
+    # username: Annotated[str, Form()],
+    # password: Annotated[str, Form()],
+    scheme: LoginUserRequestSchema, 
+    container=Depends(init_container)
+):
     '''Login user'''
     mediator: Mediator = container.resolve(Mediator)
     
     try:
         tokenInfo, *_ = await mediator.handle_command(
             LoginUserCommand(
-                login=username,
-                password=password
+                login=scheme.login,#.username,
+                password=scheme.password
         ))
     except ApplicationException as exception:
         raise HTTPException(
@@ -95,16 +97,16 @@ async def login_user_handler(
     }
 )
 async def auth_refresh_jwt_handler(
-    credentials: Annotated[HTTPAuthorizationCredentials, Depends(http_bearer)],
+    # credentials: Annotated[HTTPAuthorizationCredentials, Depends(http_bearer)],
+    scheme: RefreshTokenRequestSchema,
     container=Depends(init_container),
     ):
     '''Refresh token'''
     mediator: Mediator = container.resolve(Mediator)
-        
     try:
         tokenInfo, *_ = await mediator.handle_command(
             RefreshTokenCommand(
-                token=credentials.credentials
+                token=scheme.token
         ))
     except ApplicationException as exception:
         raise HTTPException(
@@ -131,16 +133,16 @@ async def auth_refresh_jwt_handler(
     }
 )
 async def get_user_info_handler(
-    container = Depends(init_container),
-    token: str = Depends(oauth2_bearer)
+    scheme: GetUserInfoRequestSchema,
+    container = Depends(init_container)
+    # token: str = Depends(oauth2_bearer)
 ):
     '''User info'''
-    print(token)
     mediator: Mediator = container.resolve(Mediator)
     try:
         user, *_ = await mediator.handle_query(
             GetUserInfoQuery(
-                token=token
+                token=scheme.token
         ))
     except ApplicationException as exception:
         raise HTTPException(

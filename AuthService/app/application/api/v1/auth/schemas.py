@@ -36,9 +36,9 @@ class RegisterUserResponseSchema(BaseModel):
             active=user.active
         )
         
-# class LoginUserRequestSchema(BaseModel):
-#     login: str
-#     password: str
+class LoginUserRequestSchema(BaseModel):
+    login: str
+    password: str
     
 class LoginUserResponseSchema(BaseModel):
     access_token: str
@@ -52,7 +52,10 @@ class LoginUserResponseSchema(BaseModel):
             refresh_token=tokenInfo.refresh_token,
             token_type=tokenInfo.token_type
         )
-    
+
+class RefreshTokenRequestSchema(BaseModel):
+    token: str
+
 class RefreshTokenResponseSchema(BaseModel):
     access_token: str
     refresh_token: str | None = None
@@ -69,7 +72,7 @@ class RefreshTokenResponseSchema(BaseModel):
 
 
 class GetUserInfoRequestSchema(BaseModel):
-    ...
+    token: str
     
 class GetUserInfoResponseSchema(BaseModel):
     oid: str
