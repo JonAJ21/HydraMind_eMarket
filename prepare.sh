@@ -6,3 +6,6 @@ openssl rsa -in ./AuthService/app/certs/jwt-private.pem -outform PEM -pubout -ou
 
 cp ./AuthService/docker-compose/.env.example ./AuthService/docker-compose/.env
 cp ./DataBase/docker-compose/.env.example ./DataBase/docker-compose/.env
+cp ./UserService/docker-compose/.env.example ./UserService/docker-compose/.env
+cp ./GateWay/docker-compose/.env.example ./GateWay/docker-compose/.env
+
