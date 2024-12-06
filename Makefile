@@ -1,18 +1,18 @@
 
 .PHONY: app
 app:
-	make -C ./AuthService app
 	make -C ./DataBase app
+	make -C ./AuthService app
 
 .PHONY: app-up
 app-up:
-	make -C ./AuthService app-up
 	make -C ./DataBase app-up
+	make -C ./AuthService app-up
 
 .PHONY: app-down
 app-down:
-	make -C ./AuthService app-down
 	make -C ./DataBase app-down
+	make -C ./AuthService app-down
 
 .PHONY: auth-shell
 auth-shell:
