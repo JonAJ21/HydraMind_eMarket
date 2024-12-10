@@ -28,9 +28,9 @@ class BaseUserService(ABC):
     ) -> Adress:
         ...
     
-    # @abstractmethod
-    # async def get_user_adresses(self, token: str) -> List[Adress]:
-    #     ...
+    @abstractmethod
+    async def get_user_adresses(self, token: str) -> List[Adress]:
+        ...
     
     # @abstractmethod
     # async def delete_user_adress(self, token: str, adress_id: str) -> None:
@@ -100,4 +100,19 @@ class RESTUserService(BaseUserService):
         return await self.users_repository.add_user_adress(
             user_id, region, locality, street, building
         )
+        
+    async def get_user_adresses(self, token):
+        async with httpx.AsyncClient() as client:
+            url = f"{settings.services.auth}{'/user/info'}"
+            schema = {
+                'token' : token
+            }
+            response = await client.request('GET', url, json=schema, headers=None)
+        
+        if response.is_error:
+            raise BadRequestToAuthServiceException()
+        
+        user_id = response.json()['oid']
+        
+        return await self.users_repository.get_user_adresses(user_id)
         

@@ -1,6 +1,7 @@
 
 from fastapi import APIRouter, Depends, HTTPException, status
 
+from logic.queries.get_adresses import GetAdressesQuery
 from logic.commands.adress import AddAdressCommand
 from logic.commands.email import ChangeEmailCommand
 from domain.entities.user import User
@@ -9,7 +10,7 @@ from logic.init import init_container
 from logic.mediator import Mediator
 from logic.queries.get_user import GetUserInfoQuery
 from application.api.v1.schemas import ErrorSchema
-from application.api.v1.user.schemas import AddAdressRequestSchema, AddAdressResponseSchema, ChangeEmailRequestSchema, ChangeEmailResponseSchema, GetUserInfoRequestSchema, GetUserInfoResponseSchema
+from application.api.v1.user.schemas import AddAdressRequestSchema, AddAdressResponseSchema, ChangeEmailRequestSchema, ChangeEmailResponseSchema, GetAdressResponseSchema, GetAdressesRequestSchema, GetAdressesResponseSchema, GetUserInfoRequestSchema, GetUserInfoResponseSchema
 
 
 router = APIRouter(
@@ -106,3 +107,48 @@ async def login_user_handler(
             detail={'error': exception.message}
         )
     return AddAdressResponseSchema.from_entity(adress)
+
+#====================================================================
+
+@router.get(
+    '/get/adresses',
+    response_model=GetAdressesResponseSchema,
+    status_code=status.HTTP_201_CREATED,
+    description='Get adresses',
+    responses={
+        status.HTTP_400_BAD_REQUEST: {'model': ErrorSchema}
+    }
+)
+async def login_user_handler(
+    scheme: GetAdressesRequestSchema, 
+    container=Depends(init_container)
+):
+    '''Add adress'''
+    mediator: Mediator = container.resolve(Mediator)
+    
+    try:
+        adresses, *_ = await mediator.handle_query(
+            GetAdressesQuery(
+                token=scheme.token,
+        ))
+    except ApplicationException as exception:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail={'error': exception.message}
+        )
+    
+    data = []
+    for adress in adresses:
+        schema = GetAdressResponseSchema(
+            adress_id=adress.oid,
+            region=adress.region.as_generic_type(),
+            locality=adress.locality.as_generic_type(),
+            street=adress.street.as_generic_type(),
+            building=adress.building.as_generic_type()
+        )
+        data.append(schema)
+    
+    
+    return GetAdressesResponseSchema(data=data)
+
+

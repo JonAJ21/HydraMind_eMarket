@@ -1,4 +1,6 @@
 
+from dataclasses import Field
+from typing import List
 from pydantic import BaseModel
 
 from domain.entities.adress import Adress
@@ -69,3 +71,32 @@ class AddAdressResponseSchema(BaseModel):
             street=adress.street.as_generic_type(),
             building=adress.building.as_generic_type()
         )
+        
+class GetAdressesRequestSchema(BaseModel):
+    token: str
+
+class GetAdressResponseSchema(BaseModel):
+    adress_id: str
+    region: str
+    locality: str
+    street: str
+    building: str
+    
+    
+class GetAdressesResponseSchema(BaseModel):
+    data: List[GetAdressResponseSchema]
+    
+    # @classmethod
+    # def from_entity(cls, adresses: List[Adress]) -> 'GetAdressesResponseSchema':
+        
+    #     for adress in adresses:
+    #         schema = GetAdressResponseSchema(
+    #             adress_id=adress.oid,
+    #             region=adress.region.as_generic_type(),
+    #             locality=adress.locality.as_generic_type(),
+    #             street=adress.street.as_generic_type(),
+    #             building=adress.building.as_generic_type()
+    #         )
+    #         data.append(schema)
+    #     print(data)
+    #     return data

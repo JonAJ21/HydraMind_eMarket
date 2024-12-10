@@ -5,6 +5,10 @@ from typing import List
 from asyncpg import Pool
 
 
+from domain.values.building import Building
+from domain.values.locality import Locality
+from domain.values.region import Region
+from domain.values.street import Street
 from domain.values.login import Login
 from domain.values.password import Password
 from domain.values.role import Role
@@ -29,9 +33,9 @@ class BaseUsersRepository(ABC):
         locality: str, street: str, building: str) -> Adress:
         ...
     
-    # @abstractmethod
-    # async def get_user_adresses(self, user_id: str) -> List[Adress]:
-    #     ...
+    @abstractmethod
+    async def get_user_adresses(self, user_id: str) -> List[Adress]:
+        ...
     
     # @abstractmethod
     # async def delete_user_adress(self, user_id: str, adress_id: str) -> None:
@@ -119,7 +123,36 @@ class PostgreUsersRepository(BaseUsersRepository):
         return adress
        
     
-
+    async def get_user_adresses(self, user_id) -> List[Adress]:
+        async with self._connection_pool.acquire() as connection:
+            async with connection.transaction():
+                query = '''
+                    SELECT user_adress_id, region, locality, street, building
+                    FROM users_adresses                     
+                    WHERE user_id = $1;
+                '''
+                
+                rows = await connection.fetch(
+                    query,
+                    user_id
+                )
+                
+                adresses = []
+                for row in rows:
+                    adress = Adress(
+                        oid=str(row['user_adress_id']),
+                        user_id=str(user_id),
+                        region=Region(row['region']),
+                        locality=Locality(row['locality']),
+                        street=Street(row['street']),
+                        building=Building(row['building'])
+                    )
+                    adresses.append(adress)   
+                return adresses
+                
+                
+                
+    
                 
                 
                 

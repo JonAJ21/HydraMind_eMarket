@@ -2,6 +2,7 @@
 from functools import lru_cache
 from punq import Container, Scope
 
+from logic.queries.get_adresses import GetAdressesQuery, GetAdressesQueryHandler
 from logic.commands.adress import AddAdressCommand, AddAdressCommandHandler
 from logic.commands.email import ChangeEmailCommand, ChangeEmailCommandHandler
 from logic.queries.get_user import GetUserInfoQuery, GetUserInfoQueryHandler
@@ -21,6 +22,7 @@ def _init_container() -> Container:
     container.register(BaseUserService, RESTUserService, scope=Scope.singleton)
     
     container.register(GetUserInfoQueryHandler)
+    container.register(GetAdressesQueryHandler)
     container.register(ChangeEmailCommandHandler)
     container.register(AddAdressCommandHandler)
     
@@ -31,6 +33,11 @@ def _init_container() -> Container:
         mediator.register_query(
             GetUserInfoQuery,
             [container.resolve(GetUserInfoQueryHandler)]
+        )
+        
+        mediator.register_query(
+            GetAdressesQuery,
+            [container.resolve(GetAdressesQueryHandler)]
         )
         
         mediator.register_command(
