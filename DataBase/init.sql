@@ -10,7 +10,7 @@ CREATE TABLE users (
 );
 
 CREATE TABLE users_adresses (
-	user_address_id UUID PRIMARY KEY,
+	user_adress_id UUID PRIMARY KEY,
     user_id UUID,
 	region VARCHAR(128),
 	locality VARCHAR(128),
