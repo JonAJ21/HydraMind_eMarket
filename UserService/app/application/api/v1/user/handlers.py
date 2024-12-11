@@ -1,8 +1,9 @@
 
 from fastapi import APIRouter, Depends, HTTPException, status
 
+from logic.commands.role import ChangeUserRoleCommand
 from logic.queries.get_adresses import GetAdressesQuery
-from logic.commands.adress import AddAdressCommand
+from logic.commands.adress import AddAdressCommand, DeleteAdressCommand
 from logic.commands.email import ChangeEmailCommand
 from domain.entities.user import User
 from domain.exceptions.base import ApplicationException
@@ -10,7 +11,7 @@ from logic.init import init_container
 from logic.mediator import Mediator
 from logic.queries.get_user import GetUserInfoQuery
 from application.api.v1.schemas import ErrorSchema
-from application.api.v1.user.schemas import AddAdressRequestSchema, AddAdressResponseSchema, ChangeEmailRequestSchema, ChangeEmailResponseSchema, GetAdressResponseSchema, GetAdressesRequestSchema, GetAdressesResponseSchema, GetUserInfoRequestSchema, GetUserInfoResponseSchema
+from application.api.v1.user.schemas import AddAdressRequestSchema, AddAdressResponseSchema, ChangeEmailRequestSchema, ChangeEmailResponseSchema, ChangeUserRoleRequestSchema, ChangeUserRoleResponseSchema, DeleteAdressRequestSchema, DeleteAdressResponseSchema, GetAdressResponseSchema, GetAdressesRequestSchema, GetAdressesResponseSchema, GetUserInfoRequestSchema, GetUserInfoResponseSchema
 
 
 router = APIRouter(
@@ -47,7 +48,7 @@ async def get_user_info_handler(
     return GetUserInfoResponseSchema.from_entity(user)
 
 
-@router.post(
+@router.put(
     '/change/email',
     response_model=ChangeEmailResponseSchema,
     status_code=status.HTTP_201_CREATED,
@@ -56,7 +57,7 @@ async def get_user_info_handler(
         status.HTTP_400_BAD_REQUEST: {'model': ErrorSchema}
     }
 )
-async def login_user_handler(
+async def change_user_email_handler(
     scheme: ChangeEmailRequestSchema, 
     container=Depends(init_container)
 ):
@@ -85,7 +86,7 @@ async def login_user_handler(
         status.HTTP_400_BAD_REQUEST: {'model': ErrorSchema}
     }
 )
-async def login_user_handler(
+async def add_user_adress_handler(
     scheme: AddAdressRequestSchema, 
     container=Depends(init_container)
 ):
@@ -119,7 +120,7 @@ async def login_user_handler(
         status.HTTP_400_BAD_REQUEST: {'model': ErrorSchema}
     }
 )
-async def login_user_handler(
+async def get_user_adresses_handler(
     scheme: GetAdressesRequestSchema, 
     container=Depends(init_container)
 ):
@@ -152,3 +153,69 @@ async def login_user_handler(
     return GetAdressesResponseSchema(data=data)
 
 
+@router.put(
+    '/delete/adress',
+    response_model=DeleteAdressResponseSchema,
+    status_code=status.HTTP_200_OK,
+    description='Delete adress',
+    responses={
+        status.HTTP_400_BAD_REQUEST: {'model': ErrorSchema}
+    }
+)
+async def delete_user_adress_handler(
+    scheme: DeleteAdressRequestSchema, 
+    container=Depends(init_container)
+):
+    '''Add adress'''
+    mediator: Mediator = container.resolve(Mediator)
+    
+    try:
+        stat, *_ = await mediator.handle_command(
+            DeleteAdressCommand(
+                token=scheme.token,
+                adress_id=scheme.adress_id
+        ))
+    except ApplicationException as exception:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail={'error': exception.message}
+        )
+    
+    
+    
+    return DeleteAdressResponseSchema(status=stat)
+
+
+
+@router.put(
+    '/change/role',
+    response_model=ChangeUserRoleResponseSchema,
+    status_code=status.HTTP_200_OK,
+    description='Change role',
+    responses={
+        status.HTTP_400_BAD_REQUEST: {'model': ErrorSchema}
+    }
+)
+async def change_user_role_handler(
+    scheme: ChangeUserRoleRequestSchema, 
+    container=Depends(init_container)
+):
+    '''Add adress'''
+    mediator: Mediator = container.resolve(Mediator)
+    
+    try:
+        stat, *_ = await mediator.handle_command(
+            ChangeUserRoleCommand(
+                token=scheme.token,
+                login=scheme.login,
+                new_role=scheme.new_role        
+        ))
+    except ApplicationException as exception:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail={'error': exception.message}
+        )
+    
+    
+    
+    return DeleteAdressResponseSchema(status=stat)

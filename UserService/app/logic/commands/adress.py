@@ -1,5 +1,4 @@
 from dataclasses import dataclass
-from typing import List
 
 from domain.entities.adress import Adress
 from logic.services.user import BaseUserService
@@ -24,12 +23,13 @@ class AddAdressCommandHandler(CommandHandler[AddAdressCommand, Adress]):
             command.street, command.building)
         
 @dataclass(frozen=True)
-class GetAdressesCommand(BaseCommand):
+class DeleteAdressCommand(BaseCommand):
     token: str
+    adress_id: str
     
 @dataclass(frozen=True)
-class GetAdressesCommandHandler(CommandHandler[AddAdressCommand, List[Adress]]):
+class DeleteAdressCommandHandler(CommandHandler[DeleteAdressCommand, bool]):
     user_service: BaseUserService
    
-    async def handle(self, command: AddAdressCommand) -> List[Adress]:
-        return await self.user_service.get_user_adresses(token)
+    async def handle(self, command: DeleteAdressCommand) -> bool:
+        return await self.user_service.delete_user_adress(command.token, command.adress_id)

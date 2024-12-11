@@ -73,6 +73,7 @@ CREATE TABLE orders (
     time_created TIMESTAMP,
     time_delivered TIMESTAMP,
     status VARCHAR(64),
+    is_paid BOOLEAN,
     FOREIGN KEY (user_id) REFERENCES users (user_id)
 );
 

@@ -5,6 +5,7 @@ from typing import List
 from asyncpg import Pool
 
 
+from domain.values.email import Email
 from domain.values.building import Building
 from domain.values.locality import Locality
 from domain.values.region import Region
@@ -19,6 +20,7 @@ from settings.config import settings
 
 @dataclass
 class BaseUsersRepository(ABC):
+    
     @abstractmethod
     async def get_user_by_id(self, user_id: str) -> User | None:
         ...
@@ -37,9 +39,9 @@ class BaseUsersRepository(ABC):
     async def get_user_adresses(self, user_id: str) -> List[Adress]:
         ...
     
-    # @abstractmethod
-    # async def delete_user_adress(self, user_id: str, adress_id: str) -> None:
-    #     ...
+    @abstractmethod
+    async def delete_user_adress(self, adress_id: str) -> bool:
+        ...
         
     # @abstractmethod
     # async def deactivate_user_by_login(self, admin_id: str, login: str) -> None:
@@ -49,9 +51,9 @@ class BaseUsersRepository(ABC):
     # async def activate_user_by_login(self, admin_id: str, login: str) -> None:
     #     ...
     
-    # @abstractmethod
-    # async def change_role(self, admin_id: str, new_role: str) -> None:
-    #     ...
+    @abstractmethod
+    async def change_user_role(self, login: str, new_role: str) -> bool:
+        ...
     
     
 
@@ -88,7 +90,7 @@ class PostgreUsersRepository(BaseUsersRepository):
                         oid=str(row['user_id']),
                         login=Login(row['login']),
                         password=Password(bytes(row['password'], 'utf-8')),
-                        email=row['email'],
+                        email=Email(row['email']),
                         role=Role(row['role']),
                         active=row['active']
                     )
@@ -151,10 +153,28 @@ class PostgreUsersRepository(BaseUsersRepository):
                 return adresses
                 
                 
+    async def delete_user_adress(self, adress_id) -> bool:
+        async with self._connection_pool.acquire() as connection:
+            async with connection.transaction():
+                query = '''
+                    DELETE FROM users_adresses
+                    WHERE user_adress_id = $1;
+                '''     
+                await connection.execute(query, adress_id)
                 
-    
+                return True        
+            
+    async def change_user_role(self, login: str, new_role: str) -> bool:
+        async with self._connection_pool.acquire() as connection:
+            async with connection.transaction():
+                query = '''
+                    UPDATE users
+                        SET role = $1
+                    WHERE login = $2;
+                '''
                 
-                
+                await connection.execute(query, new_role, login)
+                return True
                 
                 
         

@@ -2,8 +2,9 @@
 from functools import lru_cache
 from punq import Container, Scope
 
+from logic.commands.role import ChangeUserRoleCommand, ChangeUserRoleCommandHandler
 from logic.queries.get_adresses import GetAdressesQuery, GetAdressesQueryHandler
-from logic.commands.adress import AddAdressCommand, AddAdressCommandHandler
+from logic.commands.adress import AddAdressCommand, AddAdressCommandHandler, DeleteAdressCommand, DeleteAdressCommandHandler
 from logic.commands.email import ChangeEmailCommand, ChangeEmailCommandHandler
 from logic.queries.get_user import GetUserInfoQuery, GetUserInfoQueryHandler
 from logic.services.user import BaseUserService
@@ -25,6 +26,8 @@ def _init_container() -> Container:
     container.register(GetAdressesQueryHandler)
     container.register(ChangeEmailCommandHandler)
     container.register(AddAdressCommandHandler)
+    container.register(DeleteAdressCommandHandler)
+    container.register(ChangeUserRoleCommandHandler)
     
     
     def init_mediator():
@@ -48,6 +51,16 @@ def _init_container() -> Container:
         mediator.register_command(
             AddAdressCommand,
             [container.resolve(AddAdressCommandHandler)]
+        )
+        
+        mediator.register_command(
+            DeleteAdressCommand,
+            [container.resolve(DeleteAdressCommandHandler)]
+        )
+        
+        mediator.register_command(
+            ChangeUserRoleCommand,
+            [container.resolve(ChangeUserRoleCommandHandler)]
         )
         
         return mediator

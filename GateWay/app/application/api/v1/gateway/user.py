@@ -38,31 +38,6 @@ async def get_auth_user_info(
 
 
 @router.post(
-    '/change/email'
-)
-async def change_user_email(
-    new_email: Annotated[str, Form()],
-    token: str = Depends(oauth2_bearer)
-):
-    '''Change Email'''
-    
-    async with httpx.AsyncClient() as client:
-        url = f"{services['user']}{'/change/email'}"
-        schema = {
-            'token' : token,
-            'new_email' : new_email
-        }
-        response = await client.request('POST', url, json=schema, headers=None)
-
-    if response.is_error:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=response.json()
-        )
-    
-    return response.json()
-
-@router.post(
     '/add/adress'
 )
 async def add_user_adress(
@@ -137,45 +112,70 @@ async def delete_user_adress(
     
     return response.json()
 
+# @router.put(
+#     '/deactivate'
+# )
+# async def deactivate_user(
+#     login: str,
+#     token: str = Depends(oauth2_bearer)
+# ):
+#     '''Deactivate user'''
+    
+#     async with httpx.AsyncClient() as client:
+#         url = f"{services['user']}{'/deactivate'}"
+#         schema = {
+#             'token' : token,
+#             'login': login
+#         }
+#         response = await client.request('PUT', url, json=schema, headers=None)
+
+#     if response.is_error:
+#         raise HTTPException(
+#             status_code=status.HTTP_400_BAD_REQUEST,
+#             detail=response.json()
+#         )
+    
+#     return response.json()
+
+# @router.put(
+#     '/activate'
+# )
+# async def activate_user(
+#     login: str,
+#     token: str = Depends(oauth2_bearer)
+# ):
+#     '''Activate user'''
+    
+#     async with httpx.AsyncClient() as client:
+#         url = f"{services['user']}{'/activate'}"
+#         schema = {
+#             'token' : token,
+#             'login': login
+#         }
+#         response = await client.request('PUT', url, json=schema, headers=None)
+
+#     if response.is_error:
+#         raise HTTPException(
+#             status_code=status.HTTP_400_BAD_REQUEST,
+#             detail=response.json()
+#         )
+    
+#     return response.json()
+
 @router.put(
-    '/deactivate'
+    '/change/email'
 )
-async def deactivate_user(
-    login: str,
+async def change_user_email(
+    new_email: Annotated[str, Form()],
     token: str = Depends(oauth2_bearer)
 ):
-    '''Deactivate user'''
+    '''Change Email'''
     
     async with httpx.AsyncClient() as client:
-        url = f"{services['user']}{'/deactivate'}"
+        url = f"{services['user']}{'/change/email'}"
         schema = {
             'token' : token,
-            'login': login
-        }
-        response = await client.request('PUT', url, json=schema, headers=None)
-
-    if response.is_error:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=response.json()
-        )
-    
-    return response.json()
-
-@router.put(
-    '/activate'
-)
-async def activate_user(
-    login: str,
-    token: str = Depends(oauth2_bearer)
-):
-    '''Activate user'''
-    
-    async with httpx.AsyncClient() as client:
-        url = f"{services['user']}{'/activate'}"
-        schema = {
-            'token' : token,
-            'login': login
+            'new_email' : new_email
         }
         response = await client.request('PUT', url, json=schema, headers=None)
 
@@ -195,7 +195,7 @@ async def change_user_role(
     new_role: str,
     token: str = Depends(oauth2_bearer)
 ):
-    '''Activate user'''
+    '''Change user role'''
     
     async with httpx.AsyncClient() as client:
         url = f"{services['user']}{'/change/role'}"

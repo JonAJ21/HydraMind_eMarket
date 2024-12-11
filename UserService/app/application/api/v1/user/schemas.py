@@ -86,17 +86,17 @@ class GetAdressResponseSchema(BaseModel):
 class GetAdressesResponseSchema(BaseModel):
     data: List[GetAdressResponseSchema]
     
-    # @classmethod
-    # def from_entity(cls, adresses: List[Adress]) -> 'GetAdressesResponseSchema':
-        
-    #     for adress in adresses:
-    #         schema = GetAdressResponseSchema(
-    #             adress_id=adress.oid,
-    #             region=adress.region.as_generic_type(),
-    #             locality=adress.locality.as_generic_type(),
-    #             street=adress.street.as_generic_type(),
-    #             building=adress.building.as_generic_type()
-    #         )
-    #         data.append(schema)
-    #     print(data)
-    #     return data
+class DeleteAdressRequestSchema(BaseModel):
+    token: str
+    adress_id: str
+    
+class DeleteAdressResponseSchema(BaseModel):
+    status: bool
+    
+class ChangeUserRoleRequestSchema(BaseModel):
+    token: str
+    login: str
+    new_role: str
+    
+class ChangeUserRoleResponseSchema(BaseModel):
+    status: bool

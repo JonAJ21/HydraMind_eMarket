@@ -5,7 +5,7 @@ from typing import List
 import httpx
 
 from infrastructure.repositories.users import BaseUsersRepository
-from logic.exceptions.user import BadRequestToAuthServiceException
+from logic.exceptions.user import BadRequestToAuthServiceException, PermissionDeniedException
 from domain.entities.adress import Adress
 from domain.entities.user import User
 from settings.config import settings
@@ -32,9 +32,9 @@ class BaseUserService(ABC):
     async def get_user_adresses(self, token: str) -> List[Adress]:
         ...
     
-    # @abstractmethod
-    # async def delete_user_adress(self, token: str, adress_id: str) -> None:
-    #     ...
+    @abstractmethod
+    async def delete_user_adress(self, token: str, adress_id: str) -> bool:
+        ...
         
     # @abstractmethod
     # async def deactivate_user_by_login(self, token: str, login: str) -> None:
@@ -44,8 +44,8 @@ class BaseUserService(ABC):
     # async def activate_user_by_login(self, token: str, login: str) -> None:
     #     ...
     
-    # @abstractmethod
-    # async def change_role(self, token: str, new_role: str) -> None:
+    @abstractmethod
+    async def change_user_role(self, token: str, login: str, new_role: str) -> bool:
         ...
         
     
@@ -101,7 +101,7 @@ class RESTUserService(BaseUserService):
             user_id, region, locality, street, building
         )
         
-    async def get_user_adresses(self, token):
+    async def get_user_adresses(self, token) -> List[Adress]:
         async with httpx.AsyncClient() as client:
             url = f"{settings.services.auth}{'/user/info'}"
             schema = {
@@ -115,4 +115,34 @@ class RESTUserService(BaseUserService):
         user_id = response.json()['oid']
         
         return await self.users_repository.get_user_adresses(user_id)
+    
+    async def delete_user_adress(self, token, adress_id) -> bool:
+        async with httpx.AsyncClient() as client:
+            url = f"{settings.services.auth}{'/user/info'}"
+            schema = {
+                'token' : token
+            }
+            response = await client.request('GET', url, json=schema, headers=None)
+        
+        if response.is_error:
+            raise BadRequestToAuthServiceException()
+        
+        
+        return await self.users_repository.delete_user_adress(adress_id)
+        
+    async def change_user_role(self, token, login, new_role) -> bool:
+        async with httpx.AsyncClient() as client:
+            url = f"{settings.services.auth}{'/user/info'}"
+            schema = {
+                'token' : token
+            }
+            response = await client.request('GET', url, json=schema, headers=None)
+        
+        if response.is_error:
+            raise BadRequestToAuthServiceException()
+        
+        if response.json()['role'] not in ['ADMIN']:
+            raise PermissionDeniedException(valid_roles=['ADMIN'], role=response.json()['role'])
+        
+        return await self.users_repository.change_user_role(login, new_role)
         
