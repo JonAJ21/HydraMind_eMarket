@@ -144,5 +144,7 @@ class RESTUserService(BaseUserService):
         if response.json()['role'] not in ['ADMIN']:
             raise PermissionDeniedException(valid_roles=['ADMIN'], role=response.json()['role'])
         
+        
+        
         return await self.users_repository.change_user_role(login, new_role)
         
