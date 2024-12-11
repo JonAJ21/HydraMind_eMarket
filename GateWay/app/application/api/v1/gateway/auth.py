@@ -107,7 +107,6 @@ async def get_auth_user_info(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=response.json()
         )
-    
     return response.json()
     
     

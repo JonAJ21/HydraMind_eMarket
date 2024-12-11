@@ -154,6 +154,5 @@ async def get_user_info_handler(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail=f'Invalid token error. {exception}'
         )
-        
     return GetUserInfoResponseSchema.from_entity(user)
     

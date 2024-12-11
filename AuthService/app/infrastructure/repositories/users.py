@@ -94,7 +94,7 @@ class PostgreUsersRepository(BaseUsersRepository):
                             oid=str(row['user_id']),
                             login=Login(row['login']),
                             password=Password(bytes(row['password'], 'utf-8')),
-                            email=row['email'],
+                            email=Email(row['email']),
                             role=Role(row['role']),
                             active=row['active']
                         )
