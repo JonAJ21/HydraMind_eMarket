@@ -9,4 +9,5 @@ cp ./NotificationService/docker-compose/.env.example ./NotificationService/docke
 cp ./DataBase/docker-compose/.env.example ./DataBase/docker-compose/.env
 cp ./UserService/docker-compose/.env.example ./UserService/docker-compose/.env
 cp ./GateWay/docker-compose/.env.example ./GateWay/docker-compose/.env
+cp ./CatalogService/docker-compose/.env.example ./CatalogService/docker-compose/.env
 
