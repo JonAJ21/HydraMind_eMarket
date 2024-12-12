@@ -1,13 +1,13 @@
 from fastapi import FastAPI
 
-from application.api.v1.user.handlers import router as auth_router
+from application.api.v1.notification.handlers import router as notification_router
 
 def create_app() -> FastAPI:
     app = FastAPI(
-        title='UserService',
+        title='NotificationService',
         docs_url='/api/docs',
-        description='Service for user needs'
+        description='Notification service'
     )
     
-    app.include_router(auth_router, prefix='/user')
+    app.include_router(notification_router, prefix='/notification')
     return app

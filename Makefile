@@ -49,8 +49,8 @@ user-shell:
 auth-logs:
 	make -C ./AuthService app-logs
 
-.PHONY: notification-shell
-notification-shell:
+.PHONY: notification-logs
+notification-logs:
 	make -C ./NotificationService app-logs
 
 .PHONY: pg-logs
