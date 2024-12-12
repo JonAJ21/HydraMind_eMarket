@@ -90,6 +90,7 @@ CREATE TABLE order_notifications (
     user_id UUID,
     notification_text TEXT,
     is_readed BOOLEAN,
+    time_created TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users (user_id)
 );
 

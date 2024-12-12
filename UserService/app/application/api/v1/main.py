@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 
-from application.api.v1.user.handlers import router as auth_router
+from application.api.v1.user.handlers import router as user_router
 
 def create_app() -> FastAPI:
     app = FastAPI(
@@ -9,5 +9,5 @@ def create_app() -> FastAPI:
         description='Service for user needs'
     )
     
-    app.include_router(auth_router, prefix='/user')
+    app.include_router(user_router, prefix='/user')
     return app
