@@ -22,15 +22,10 @@ CREATE TABLE users_adresses (
 
 CREATE TABLE categories (
     category_id UUID PRIMARY KEY,
-    name VARCHAR(256)
+    name VARCHAR(256),
+    parent_category_id UUID
 );
 
-CREATE TABLE sub_categories (
-    sub_category_id UUID PRIMARY KEY,
-    main_category_id UUID,
-    name VARCHAR(256),
-    FOREIGN KEY (main_category_id) REFERENCES categories (category_id)
-);
 CREATE TABLE products (
 	product_id UUID PRIMARY KEY,
 	name VARCHAR(256),
@@ -41,7 +36,7 @@ CREATE TABLE products (
 	price float,
 	discount_percent float,
     FOREIGN KEY (salesman_id) REFERENCES users (user_id),
-	FOREIGN KEY (category_id) REFERENCES sub_categories (sub_category_id)
+	FOREIGN KEY (category_id) REFERENCES categories (category_id)
 );
 
 CREATE TABLE product_photos (
@@ -80,7 +75,7 @@ CREATE TABLE orders (
 CREATE TABLE order_product_count (
     order_id UUID,
     product_id UUID,
-    count UUID,
+    count INT,
     FOREIGN KEY (order_id) REFERENCES orders (order_id),
     FOREIGN KEY (product_id) REFERENCES products (product_id)
 );

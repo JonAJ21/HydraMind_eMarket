@@ -5,6 +5,7 @@ app:
 	make -C ./NotificationService app
 	make -C ./AuthService app
 	make -C ./UserService app
+	make -C ./CatalogService app
 	make -C ./GateWay app
 
 .PHONY: app-up
@@ -13,6 +14,7 @@ app-up:
 	make -C ./NotificationService app-up
 	make -C ./AuthService app-up
 	make -C ./UserService app-up
+	make -C ./CatalogService app-up
 	make -C ./GateWay app-up
 
 .PHONY: app-down
@@ -21,6 +23,7 @@ app-down:
 	make -C ./NotificationService app-down
 	make -C ./AuthService app-down
 	make -C ./UserService app-down
+	make -C ./CatalogService app-down
 	make -C ./GateWay app-down
 
 
@@ -39,6 +42,10 @@ pg-shell:
 .PHONY: gateway-shell
 gateway-shell:
 	make -C ./GateWay app-shell
+
+.PHONY: catalog-shell
+catalog-shell:
+	make -C ./CatalogService app-shell
 
 .PHONY: user-shell
 user-shell:
@@ -60,6 +67,10 @@ pg-logs:
 .PHONY: gateway-logs
 gateway-logs:
 	make -C ./GateWay app-logs
+
+.PHONY: catalog-logs
+catalog-logs:
+	make -C ./CatalogService app-logs
 
 .PHONY: user-logs
 user-logs:
