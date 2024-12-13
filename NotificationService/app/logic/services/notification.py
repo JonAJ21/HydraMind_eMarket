@@ -68,4 +68,4 @@ class RESTNotificationService(BaseNotificationService):
         
         user_id = response.json()['oid']
         
-        return await self.notification_repository.get_unread_notifications(user_id)
+        return await self.notification_repository.get_unread_notifications(user_id) 
