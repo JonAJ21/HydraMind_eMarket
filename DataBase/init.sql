@@ -89,4 +89,66 @@ CREATE TABLE order_notifications (
     FOREIGN KEY (user_id) REFERENCES users (user_id)
 );
 
+CREATE VIEW order_product_details AS
+SELECT 
+    op.order_id,
+    op.product_id,
+    op.count AS product_count,
+    p.name AS product_name,
+    p.price AS product_price,
+    (op.count * p.price) AS total_price
+FROM 
+    order_product_count op
+JOIN 
+    products p ON op.product_id = p.product_id;
 
+CREATE VIEW user_notifications AS
+SELECT 
+    n.notification_id,
+    n.notification_text,
+    n.is_readed,
+    n.time_created,
+    u.login AS user_login
+FROM 
+    order_notifications n
+JOIN 
+    users u ON n.user_id = u.user_id;
+
+CREATE OR REPLACE PROCEDURE add_new_product(
+    p_product_id UUID,
+    p_name VARCHAR,
+    p_salesman_id UUID,
+    p_category_id UUID,
+    p_description TEXT,
+    p_rating FLOAT,
+    p_price FLOAT,
+    p_discount_percent FLOAT,
+    p_photo_url TEXT
+)
+LANGUAGE plpgsql AS $$
+BEGIN
+    -- Вставка нового продукта
+    INSERT INTO products (product_id, name, salesman_id, category_id, description, rating, price, discount_percent)
+    VALUES (p_product_id, p_name, p_salesman_id, p_category_id, p_description, p_rating, p_price, p_discount_percent);
+    
+    -- Вставка фотографии продукта
+    INSERT INTO product_photos (photo_id, product_id, photo_url)
+    VALUES (uuid_generate_v4(), p_product_id, p_photo_url);
+END;
+$$;
+
+
+CREATE OR REPLACE FUNCTION check_user_exists()
+RETURNS TRIGGER AS $$
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM users WHERE user_id = NEW.user_id) THEN
+        RAISE EXCEPTION 'User with ID % does not exist', NEW.user_id;
+    END IF;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trg_check_user_exists
+BEFORE INSERT ON users_adresses
+FOR EACH ROW
+EXECUTE FUNCTION check_user_exists();

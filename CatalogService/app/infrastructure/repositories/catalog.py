@@ -2,6 +2,7 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from typing import List
 
+from domain.entities.category import Category
 from domain.entities.product import Product
 from settings.config import settings
 
@@ -16,6 +17,10 @@ class BaseCatalogRepository(ABC):
     
     @abstractmethod
     async def add_category(self, category_id: str, category_name: str, parent_category_id: str) -> None:
+        ...
+        
+    @abstractmethod
+    async def get_categories(self) -> List[Category]:
         ...
         
     @abstractmethod
@@ -61,7 +66,29 @@ class PostgreCatalogRepository(BaseCatalogRepository):
                     category_name, parent_category_id
                 )
                        
+    async def get_categories(self) -> List[Category]:
+        async with self._connection_pool.acquire() as connection:
+            async with connection.transaction():
+                query = '''
+                    SELECT category_id, name, parent_category_id
+                    FROM categories
+                '''
                 
+                rows = await connection.fetch(
+                    query
+                )
+                
+                categories = []
+                for row in rows:
+                    category = Category(
+                        oid=str(row['category_id']),
+                        category_name=str(row['name']),
+                        parent_category=str(row['parent_category_id'])
+                    )
+                    categories.append(category)
+                return categories
+                    
+              
     async def add_product(self, product: Product) -> None:
         async with self._connection_pool.acquire() as connection:
             async with connection.transaction():
