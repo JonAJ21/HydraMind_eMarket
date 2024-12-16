@@ -3,14 +3,14 @@ from functools import lru_cache
 from punq import Container, Scope
 
 from infrastructure.repositories.order import BaseOrderRepository, PostgreOrderRepository
-from logic.commands.order import AddProductToOrderCommand, AddProductToOrderCommandHandler, CreateOrderCommand, CreateOrderCommandHandler
+from logic.commands.order import AddProductToOrderCommand, AddProductToOrderCommandHandler, ChangeOrderStatusCommand, ChangeOrderStatusCommandHandler, CreateOrderCommand, CreateOrderCommandHandler
 from logic.queries.order import GetOrderInfoQuery, GetOrderInfoQueryHandler, GetOrdersInfoQuery, GetOrdersInfoQueryHandler
 from logic.services.order import BaseOrderService, RESTOrderService
 from logic.queries.storage import GetProductsInfoBySalesmanQuery, GetProductsInfoBySalesmanQueryHandler
 from logic.commands.storage import AddProductCountToStorageCommand, AddProductCountToStorageCommandHandler, AddStorageCommand, AddStorageCommandHandler, TakeProductCountFromStorageCommand, TakeProductCountFromStorageCommandHandler
 from logic.services.storage import BaseStorageService, RESTStorageService
 from infrastructure.repositories.storage import BaseStorageRepository, PostgreStorageRepository
-from logic.queries.catalog import GetProductsByCategoryQuery, GetProductsByCategoryQueryHandler
+from logic.queries.catalog import GetCategoriesQuery, GetCategoriesQueryHandler, GetProductsByCategoryQuery, GetProductsByCategoryQueryHandler
 from logic.commands.category import AddCategoryCommand, AddCategoryCommandHandler, AddProductCommand, AddProductCommandHandler
 from infrastructure.repositories.catalog import BaseCatalogRepository, PostgreCatalogRepository
 from logic.services.catalog import BaseCatalogService, RESTCatalogService
@@ -32,6 +32,7 @@ def _init_container() -> Container:
     container.register(AddCategoryCommandHandler)
     container.register(AddProductCommandHandler)
     container.register(GetProductsByCategoryQueryHandler)
+    container.register(GetCategoriesQueryHandler)
     container.register(AddStorageCommandHandler)
     container.register(AddProductCountToStorageCommandHandler)
     container.register(TakeProductCountFromStorageCommandHandler)
@@ -40,6 +41,7 @@ def _init_container() -> Container:
     container.register(AddProductToOrderCommandHandler)
     container.register(GetOrderInfoQueryHandler)
     container.register(GetOrdersInfoQueryHandler)
+    container.register(ChangeOrderStatusCommandHandler)
     
     
     def init_mediator():
@@ -58,6 +60,11 @@ def _init_container() -> Container:
         mediator.register_query(
             GetProductsByCategoryQuery,
             [container.resolve(GetProductsByCategoryQueryHandler)]
+        )
+        
+        mediator.register_query(
+            GetCategoriesQuery,
+            [container.resolve(GetCategoriesQueryHandler)]
         )
         
         mediator.register_command(
@@ -99,6 +106,12 @@ def _init_container() -> Container:
             GetOrdersInfoQuery,
             [container.resolve(GetOrdersInfoQueryHandler)]
         )
+        
+        mediator.register_command(
+            ChangeOrderStatusCommand,
+            [container.resolve(ChangeOrderStatusCommandHandler)]
+        )
+        
         
 
         return mediator

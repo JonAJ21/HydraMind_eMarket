@@ -111,3 +111,31 @@ async def add_order_product(
         )
     
     return response.json()
+
+@router.post(
+    '/change/order/status'
+)
+async def add_order_product(
+    order_id: str,
+    order_status: str,
+    token: str = Depends(oauth2_bearer)
+):
+    '''Create order'''
+    
+    async with httpx.AsyncClient() as client:
+        url = f"{services['catalog']}{'/change/order/status'}"
+        print(url)
+        scheme_json = {
+            'token' : token,
+            'order_id': order_id,
+            'status': order_status
+        }
+        response = await client.request('POST', url, json=scheme_json, headers=None)
+
+    if response.is_error:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=response.json()
+        )
+    
+    return response.json()

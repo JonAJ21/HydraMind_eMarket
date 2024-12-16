@@ -86,6 +86,27 @@ async def get_products_by_category(
     
     return response.json()
 
+
+@router.get(
+    '/get/categories'
+)
+async def get_categories(
+):
+    '''Get categories'''
+    async with httpx.AsyncClient() as client:
+        url = f"{services['catalog']}{'/get/categories'}"
+        schema = {
+        }
+        response = await client.request('GET', url, json=schema, headers=None)
+
+    if response.is_error:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=response.json()
+        )
+    
+    return response.json()
+
 @router.post(
     '/add/storage'
 )

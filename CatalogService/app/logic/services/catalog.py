@@ -34,6 +34,9 @@ class BaseCatalogService(ABC):
     ) -> List[Product]:
         ...
     
+    @abstractmethod
+    async def get_categories(self) -> List[Category]:
+        ...
     
     
 @dataclass
@@ -118,3 +121,5 @@ class RESTCatalogService(BaseCatalogService):
         return await self.catalog_repository.get_products_by_category(category_id)
         
     
+    async def get_categories(self) -> List[Category]:
+        return await self.catalog_repository.get_categories()
