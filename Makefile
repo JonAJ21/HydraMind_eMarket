@@ -7,6 +7,7 @@ app:
 	make -C ./UserService app
 	make -C ./CatalogService app
 	make -C ./GateWay app
+	make -C ./GUI app
 
 .PHONY: app-up
 app-up:
@@ -16,6 +17,7 @@ app-up:
 	make -C ./UserService app-up
 	make -C ./CatalogService app-up
 	make -C ./GateWay app-up
+	make -C ./GUI app-up
 
 .PHONY: app-down
 app-down:
@@ -25,6 +27,7 @@ app-down:
 	make -C ./UserService app-down
 	make -C ./CatalogService app-down
 	make -C ./GateWay app-down
+	make -C ./GUI app-down
 
 
 .PHONY: auth-shell

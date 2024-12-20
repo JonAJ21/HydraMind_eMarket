@@ -58,6 +58,33 @@ class AddProductResponseScheme(BaseModel):
         )
 
 
+
+class GetCategoryResponseScheme(BaseModel):
+    category_id: str
+    name: str
+    parent_category_id: str
+
+    @classmethod
+    def from_entity(cls, category: Category) -> 'GetCategoryResponseScheme':
+        return GetCategoryResponseScheme(
+            category_id=category.oid,
+            name=category.category_name,
+            parent_category_id=category.parent_category
+        )
+
+class GetCategoriesResponseScheme(BaseModel):
+    data: List[GetCategoryResponseScheme]
+    
+    @classmethod
+    def from_entity(cls, categories: List[Category]) -> 'GetCategoriesResponseScheme':
+        d = []
+        for category in categories:
+            d.append(
+                GetCategoryResponseScheme.from_entity(category)
+            )
+        return GetCategoriesResponseScheme(data=d)
+
+
 class GetProductsByCategoryRequestScheme(BaseModel):
     category_name: str
 
@@ -252,3 +279,11 @@ class GetOrdersInfoResponseScheme(BaseModel):
         return GetOrdersInfoResponseScheme(
             data=d
         )
+        
+class ChangeOrderStatusRequestScheme(BaseModel):
+    token: str
+    order_id: str
+    status: str
+    
+class ChangeOrderStatusResponseScheme(BaseModel):
+    ...

@@ -3,12 +3,12 @@ from fastapi import APIRouter, Depends, HTTPException, status
 
 
 from logic.queries.order import GetOrderInfoQuery, GetOrdersInfoQuery
-from logic.commands.order import AddProductToOrderCommand, CreateOrderCommand
+from logic.commands.order import AddProductToOrderCommand, ChangeOrderStatusCommand, CreateOrderCommand
 from logic.queries.storage import GetProductsInfoBySalesmanQuery
 from logic.commands.storage import AddProductCountToStorageCommand, AddStorageCommand, TakeProductCountFromStorageCommand
-from logic.queries.catalog import GetProductsByCategoryQuery
+from logic.queries.catalog import GetCategoriesQuery, GetProductsByCategoryQuery
 from logic.commands.category import AddCategoryCommand, AddProductCommand
-from application.api.v1.catalog.schemas import AddCategoryRequestScheme, AddCategoryResponseScheme, AddProductCountToStorageRequestScheme, AddProductCountToStorageResponseScheme, AddProductRequestScheme, AddProductResponseScheme, AddProductToOrderRequestScheme, AddProductToOrderResponseScheme, AddStorageRequestScheme, AddStorageResponseScheme, CreateOrderRequestScheme, CreateOrderResponseScheme, GetOrderInfoRequestScheme, GetOrderInfoResponseScheme, GetOrdersInfoRequestScheme, GetOrdersInfoResponseScheme, GetProductByCategoryResponseScheme, GetProductBySalesmanRequestScheme, GetProductBySalesmanResponseScheme, GetProductsByCategoryRequestScheme, GetProductsByCategoryResponseScheme, GetProductsBySalesmanResponseScheme, TakeProductCountFromStorageRequestScheme, TakeProductCountFromStorageResponseScheme
+from application.api.v1.catalog.schemas import AddCategoryRequestScheme, AddCategoryResponseScheme, AddProductCountToStorageRequestScheme, AddProductCountToStorageResponseScheme, AddProductRequestScheme, AddProductResponseScheme, AddProductToOrderRequestScheme, AddProductToOrderResponseScheme, AddStorageRequestScheme, AddStorageResponseScheme, ChangeOrderStatusRequestScheme, ChangeOrderStatusResponseScheme, CreateOrderRequestScheme, CreateOrderResponseScheme, GetCategoriesResponseScheme, GetOrderInfoRequestScheme, GetOrderInfoResponseScheme, GetOrdersInfoRequestScheme, GetOrdersInfoResponseScheme, GetProductByCategoryResponseScheme, GetProductBySalesmanRequestScheme, GetProductBySalesmanResponseScheme, GetProductsByCategoryRequestScheme, GetProductsByCategoryResponseScheme, GetProductsBySalesmanResponseScheme, TakeProductCountFromStorageRequestScheme, TakeProductCountFromStorageResponseScheme
 from domain.exceptions.base import ApplicationException
 from logic.mediator import Mediator
 from logic.init import init_container
@@ -54,6 +54,8 @@ async def add_category_handler(
     return AddCategoryResponseScheme.from_entity(category)
 
 
+
+
 @router.post(
     '/add/product',
     response_model=AddProductResponseScheme,
@@ -86,6 +88,51 @@ async def add_product_handler(
         )
     
     return AddProductResponseScheme.from_entity(product)
+
+
+
+
+@router.get(
+    '/get/categories',
+    response_model=GetCategoriesResponseScheme,
+    status_code=status.HTTP_200_OK,
+    description='Get categories',
+    responses={
+        status.HTTP_400_BAD_REQUEST: {'model': ErrorSchema}
+    }
+)
+async def get_categories_handler(
+    container = Depends(init_container)
+):
+    '''Get categories'''
+    mediator: Mediator = container.resolve(Mediator)
+    try:
+        categories, *_ = await mediator.handle_query(
+            GetCategoriesQuery(
+        ))
+    except ApplicationException as exception:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail={'error': exception.message}
+        )
+    
+    return GetCategoriesResponseScheme.from_entity(categories)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 @router.get(
     '/get/category/products',
@@ -398,3 +445,33 @@ async def get_orders_info_handler(
     return GetOrdersInfoResponseScheme.from_entity(orders)
 
 
+
+@router.post(
+    '/change/order/status',
+    response_model=ChangeOrderStatusResponseScheme,
+    status_code=status.HTTP_201_CREATED,
+    description='Create order',
+    responses={
+        status.HTTP_400_BAD_REQUEST: {'model': ErrorSchema}
+    }
+)
+async def change_order_status_handler(
+    scheme: ChangeOrderStatusRequestScheme,
+    container=Depends(init_container)
+):
+    '''Create order'''
+    mediator: Mediator = container.resolve(Mediator)
+    try:
+        order, *_ = await mediator.handle_command(
+            ChangeOrderStatusCommand(
+                token=scheme.token,
+                order_id=scheme.order_id,
+                status=scheme.status
+            ))
+    except ApplicationException as exception:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail={'error': exception.message}
+        )
+    
+    return {}

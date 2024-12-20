@@ -31,6 +31,10 @@ class BaseOrderRepository(ABC):
     async def get_user_order_ids(self, user_id: str, limit: int) -> List[str]:
         ...
         
+    @abstractmethod
+    async def change_order_status(self, order_id: str, status: str) -> None:
+        ...
+        
 @dataclass
 class PostgreOrderRepository(BaseOrderRepository):
     _connection_pool: Pool = settings.postgre_sql_pool.pool
@@ -146,4 +150,14 @@ class PostgreOrderRepository(BaseOrderRepository):
                 
                 return ids
                 
-        
+    async def change_order_status(self, order_id: str, status: str) -> None:
+        async with self._connection_pool.acquire() as connection:
+            async with connection.transaction():
+                query = '''
+                    UPDATE orders
+                        SET status = $2
+                    WHERE order_id = $1;      
+                '''
+                
+                await connection.execute(query, order_id, status)
+                

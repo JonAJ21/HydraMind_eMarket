@@ -30,7 +30,12 @@ class BaseOrderService(ABC):
     @abstractmethod
     async def get_orders_info(self, token: str, limit: int) -> List[Order]:
         ...
-
+        
+    @abstractmethod
+    async def change_order_status(self, token: str, order_id: str, status: str) -> None:
+        ...
+    
+    
 @dataclass    
 class RESTOrderService(BaseOrderService):
     order_repository: BaseOrderRepository
@@ -110,4 +115,16 @@ class RESTOrderService(BaseOrderService):
             orders.append(order)
             
         return orders
+    
+    async def change_order_status(self, token: str, order_id: str, status: str) -> None:
+        async with httpx.AsyncClient() as client:
+            url = f"{settings.services.auth}{'/user/info'}"
+            schema = {
+                'token' : token
+            }
+            response = await client.request('GET', url, json=schema, headers=None)
         
+        if response.is_error:
+            raise BadRequestToAuthServiceException()
+        
+        await self.order_repository.change_order_status(order_id, status)
