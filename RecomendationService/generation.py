@@ -6,16 +6,17 @@ from faker import Faker
 from sqlalchemy import create_engine, text
 
 # Настройки подключения к базе данных
-DB_USER = 'your_username'
-DB_PASSWORD = 'your_password'
+DB_USER = 'postgres'
+DB_PASSWORD = '123456'
 DB_HOST = 'localhost'
 DB_PORT = '5432'
-DB_NAME = 'your_database'
+DB_NAME = 'hydra'
 
 # Создание подключения
 engine = create_engine(f'postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}')
 
 fake = Faker()
+
 
 def generate_users(n):
     users = []
@@ -32,6 +33,7 @@ def generate_users(n):
         users.append(user)
     return users
 
+
 def generate_addresses(users, n):
     addresses = []
     for _ in range(n):
@@ -46,6 +48,7 @@ def generate_addresses(users, n):
         addresses.append(address)
     return addresses
 
+
 def generate_categories(n):
     categories = []
     for _ in range(n):
@@ -57,13 +60,18 @@ def generate_categories(n):
         categories.append(category)
     return categories
 
+
 def generate_products(users, categories, n):
+    sellers = [user['user_id'] for user in users if user['role'] == 'seller']
+    if not sellers:
+        raise ValueError("Нет пользователей с ролью 'seller'. Сгенерируйте пользователей с ролью 'seller'.")
+
     products = []
     for _ in range(n):
         product = {
             'product_id': str(uuid.uuid4()),
             'name': fake.word().capitalize(),
-            'salesman_id': random.choice([user['user_id'] for user in users if user['role'] == 'seller']),
+            'salesman_id': random.choice(sellers),
             'category_id': random.choice(categories)['category_id'],
             'description': fake.text(max_nb_chars=200),
             'rating': round(random.uniform(1, 5), 2),
@@ -72,6 +80,7 @@ def generate_products(users, categories, n):
         }
         products.append(product)
     return products
+
 
 def generate_product_photos(products, n_per_product=3):
     photos = []
@@ -84,6 +93,7 @@ def generate_product_photos(products, n_per_product=3):
             }
             photos.append(photo)
     return photos
+
 
 def generate_storages(n):
     storages = []
@@ -98,6 +108,7 @@ def generate_storages(n):
         storages.append(storage)
     return storages
 
+
 def generate_product_storage_count(products, storages, n):
     psc = []
     for _ in range(n):
@@ -109,19 +120,23 @@ def generate_product_storage_count(products, storages, n):
         psc.append(entry)
     return psc
 
+
 def generate_orders(users, n):
     orders = []
     for _ in range(n):
+        created_time = fake.date_time_between(start_date='-1y', end_date='now')
+        delivered_time = created_time + timedelta(days=random.randint(1, 30))
         order = {
             'order_id': str(uuid.uuid4()),
             'user_id': random.choice(users)['user_id'],
-            'time_created': fake.date_time_between(start_date='-1y', end_date='now'),
-            'time_delivered': fake.date_time_between(start_date='now', end_date='+30d'),
+            'time_created': created_time,
+            'time_delivered': delivered_time,
             'status': random.choice(['pending', 'delivered', 'canceled']),
             'is_paid': random.choice([True, False])
         }
         orders.append(order)
     return orders
+
 
 def generate_order_product_count(orders, products, n):
     opc = []
@@ -133,6 +148,7 @@ def generate_order_product_count(orders, products, n):
         }
         opc.append(entry)
     return opc
+
 
 def generate_order_notifications(users, n):
     notifications = []
@@ -147,6 +163,7 @@ def generate_order_notifications(users, n):
         notifications.append(notification)
     return notifications
 
+
 def insert_data(table, data):
     if not data:
         return
@@ -155,54 +172,55 @@ def insert_data(table, data):
     placeholders = ', '.join([f":{key}" for key in keys])
     insert_query = text(f"INSERT INTO {table} ({columns}) VALUES ({placeholders})")
     with engine.begin() as connection:
-        connection.execute(text(f"DELETE FROM {table}"))  # Очистка таблицы перед вставкой
-        connection.execute(text(f"ALTER SEQUENCE {table}_id_seq RESTART WITH 1"),) if 'id_seq' in table else None
-        connection.execute(
-            f"INSERT INTO {table} ({columns}) VALUES " +
-            ','.join([f"({', '.join(['%s'] * len(keys))})" for _ in data]),
-            [tuple(item.values()) for item in data]
-        )
+        # Очистка таблицы перед вставкой
+        connection.execute(text(f"DELETE FROM {table}"))
+
+        # Вставка данных
+        connection.execute(insert_query, data)
+
 
 def main():
     with engine.connect() as connection:
         # Отключение ограничений внешних ключей для вставки данных в правильном порядке
         connection.execute(text("SET session_replication_role = 'replica';"))
 
-        # Генерация данных
-        users = generate_users(10)
-        insert_data('users', users)
+        try:
+            # Генерация данных
+            users = generate_users(20)  # Увеличено количество пользователей до 20
+            insert_data('users', users)
 
-        addresses = generate_addresses(users, 15)
-        insert_data('users_adresses', addresses)
+            addresses = generate_addresses(users, 30)  # Увеличено количество адресов до 30
+            insert_data('users_adresses', addresses)
 
-        categories = generate_categories(5)
-        insert_data('categories', categories)
+            categories = generate_categories(10)  # Увеличено количество категорий до 10
+            insert_data('categories', categories)
 
-        products = generate_products(users, categories, 20)
-        insert_data('products', products)
+            products = generate_products(users, categories, 50)  # Увеличено количество продуктов до 50
+            insert_data('products', products)
 
-        photos = generate_product_photos(products)
-        insert_data('product_photos', photos)
+            photos = generate_product_photos(products)
+            insert_data('product_photos', photos)
 
-        storages = generate_storages(5)
-        insert_data('storages', storages)
+            storages = generate_storages(10)  # Увеличено количество складов до 10
+            insert_data('storages', storages)
 
-        psc = generate_product_storage_count(products, storages, 50)
-        insert_data('product_storage_count', psc)
+            psc = generate_product_storage_count(products, storages, 100)  # Увеличено количество записей до 100
+            insert_data('product_storage_count', psc)
 
-        orders = generate_orders(users, 30)
-        insert_data('orders', orders)
+            orders = generate_orders(users, 100)  # Увеличено количество заказов до 100
+            insert_data('orders', orders)
 
-        opc = generate_order_product_count(orders, products, 60)
-        insert_data('order_product_count', opc)
+            opc = generate_order_product_count(orders, products, 200)  # Увеличено количество записей до 200
+            insert_data('order_product_count', opc)
 
-        notifications = generate_order_notifications(users, 20)
-        insert_data('order_notifications', notifications)
-
-        # Включение ограничений внешних ключей
-        connection.execute(text("SET session_replication_role = 'origin';"))
+            notifications = generate_order_notifications(users, 50)  # Увеличено количество уведомлений до 50
+            insert_data('order_notifications', notifications)
+        finally:
+            # Включение ограничений внешних ключей
+            connection.execute(text("SET session_replication_role = 'origin';"))
 
     print("Данные успешно вставлены в базу данных.")
+
 
 if __name__ == "__main__":
     main()
