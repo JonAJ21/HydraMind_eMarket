@@ -4,11 +4,11 @@ from sklearn.neighbors import NearestNeighbors
 from datetime import datetime
 
 # Настройки подключения к базе данных
-DB_USER = 'postgres'
-DB_PASSWORD = '123456'
+DB_USER = 'admin'
+DB_PASSWORD = 'password'
 DB_HOST = 'localhost'
 DB_PORT = '5432'
-DB_NAME = 'hydra'
+DB_NAME = 'EMarket'
 
 # Создание подключения
 engine = create_engine(f'postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}')
@@ -119,7 +119,7 @@ def save_recommendations(user_id, recommended_products):
     data = {
         'user_id': user_id,
         'recommended_products': recommended_products,
-        'generated_at': datetime.utcnow()
+        'generated_at': datetime.now()
     }
     with engine.connect() as connection:
         connection.execute(text(insert_query), data)

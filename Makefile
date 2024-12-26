@@ -8,6 +8,7 @@ app:
 	make -C ./CatalogService app
 	make -C ./GateWay app
 	make -C ./GUI app
+	make -C ./RecomendationService app
 
 .PHONY: app-up
 app-up:
@@ -18,7 +19,7 @@ app-up:
 	make -C ./CatalogService app-up
 	make -C ./GateWay app-up
 	make -C ./GUI app-up
-
+	make -C ./RecomendationService app-up
 .PHONY: app-down
 app-down:
 	make -C ./DataBase app-down
@@ -28,7 +29,7 @@ app-down:
 	make -C ./CatalogService app-down
 	make -C ./GateWay app-down
 	make -C ./GUI app-down
-
+	make -C ./RecomendationService app-down
 
 .PHONY: auth-shell
 auth-shell:
@@ -54,6 +55,9 @@ catalog-shell:
 user-shell:
 	make -C ./UserService app-shell
 
+.PHONY: recomendation-shell
+recomendation-shell:
+	make -C ./RecomendationService app-shell
 
 .PHONY: auth-logs
 auth-logs:
@@ -78,3 +82,7 @@ catalog-logs:
 .PHONY: user-logs
 user-logs:
 	make -C ./UserService app-logs
+
+.PHONY: recomendation-logs
+recomendation-logs:
+	make -C ./RecomendationService app-logs
