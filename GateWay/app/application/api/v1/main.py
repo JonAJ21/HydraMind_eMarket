@@ -7,6 +7,7 @@ from application.api.v1.gateway.catalog import router as catalog_router
 from application.api.v1.gateway.storage import router as storage_router
 from application.api.v1.gateway.order import router as order_router
 from application.api.v1.gateway.recomendations import router as recomendations_router
+from application.api.v1.gateway.payment import router as payment_router
 
 def create_app() -> FastAPI:
     app = FastAPI(
@@ -22,4 +23,5 @@ def create_app() -> FastAPI:
     app.include_router(storage_router, prefix='/storage')
     app.include_router(order_router, prefix='/order')
     app.include_router(recomendations_router, prefix='/recomendations')
+    app.include_router(payment_router, prefix='/payment')
     return app

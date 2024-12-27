@@ -9,6 +9,7 @@ app:
 	make -C ./GateWay app
 	make -C ./GUI app
 	make -C ./RecomendationService app
+	make -C ./PaymentService app
 
 .PHONY: app-up
 app-up:
@@ -20,6 +21,8 @@ app-up:
 	make -C ./GateWay app-up
 	make -C ./GUI app-up
 	make -C ./RecomendationService app-up
+	make -C ./PaymentService app-up
+
 .PHONY: app-down
 app-down:
 	make -C ./DataBase app-down
@@ -30,6 +33,7 @@ app-down:
 	make -C ./GateWay app-down
 	make -C ./GUI app-down
 	make -C ./RecomendationService app-down
+	make -C ./PaymentService app-down
 
 .PHONY: auth-shell
 auth-shell:
