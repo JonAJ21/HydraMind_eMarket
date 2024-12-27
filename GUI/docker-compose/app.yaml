@@ -1,0 +1,20 @@
+services:
+  gui:
+    container_name: gui
+    build: 
+      context: ..
+      dockerfile: Dockerfile
+    command: "streamlit run main.py --server.port=8057"
+    volumes:
+      - ../app:/app/
+    ports:
+      - "${API_PORT}:8057"
+    env_file: ".env"
+    
+    restart: always
+    networks:
+      - backend
+
+networks:
+  backend:
+    driver: bridge
