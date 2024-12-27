@@ -20,7 +20,8 @@ python-multipart = "^0.0.17"
 asyncpg = "^0.30.0"
 django-environ = "^0.11.2"
 nest-asyncio = "^1.6.0"
-
+pytest-mock = "^3.9.0"
+pytest-cov = "^4.0.0"
 
 [build-system]
 requires = ["poetry-core"]
