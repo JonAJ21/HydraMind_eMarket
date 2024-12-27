@@ -1,0 +1,25 @@
+from unittest.mock import AsyncMock
+from logic.commands.adress import AddAdressCommand, AddAdressCommandHandler
+from logic.services.user import BaseUserService
+from domain.entities.adress import Adress
+
+class TestAddAdressCommandHandler:
+    async def test_add_adress(self):
+        user_service_mock = AsyncMock(BaseUserService)
+        user_service_mock.add_user_adress.return_value = Adress(
+            region="Region", locality="Locality", street="Street", building="Building"
+        )
+        
+        command = AddAdressCommand(
+            token="token", region="Region", locality="Locality",
+            street="Street", building="Building"
+        )
+        
+        handler = AddAdressCommandHandler(user_service=user_service_mock)
+        adress = await handler.handle(command)
+        
+        assert adress.region == "Region"
+        assert adress.locality == "Locality"
+        user_service_mock.add_user_adress.assert_awaited_once_with(
+            "token", "Region", "Locality", "Street", "Building"
+        )
