@@ -35,7 +35,7 @@ def get_categories():
     return names
 
 def get_products(category_name):
-    def _make_order(product_id, salesman_id):
+    def _make_order(product_id, salesman_id, name, price):
         with httpx.Client() as client:
             url = f"{services['user']}{'/get/adresses'}"
             schema = {
@@ -54,6 +54,18 @@ def get_products(category_name):
         locality = response.json()['data'][0]['locality']
         street = response.json()['data'][0]['street']
         building = response.json()['data'][0]['building']
+
+        with httpx.Client() as client:
+            url = f"{services['payment']}{'/get/payment/status'}"
+            schema = {
+                  'name': name,
+                  'price': price
+            }
+            response = client.request('GET', url, json=schema, headers=None)
+        if response.is_error:
+            return False
+        if response.json()['payment_status'] != 'success':
+            return False
         
         with httpx.Client() as client:
             url = f"{services['catalog']}{'/create/order'}"
@@ -123,7 +135,7 @@ def get_products(category_name):
         
         submit_button = st.button(
             label='Заказать',
-            on_click=lambda product_id=product['product_id'], salesman_id=product['salesman_id'] :_make_order(product_id, salesman_id),
+            on_click=lambda product_id=product['product_id'], salesman_id=product['salesman_id'], name=product['name'], price = product['price'] * (1 - product['discount_percent'] * 0.01) :_make_order(product_id, salesman_id, name, price),
             key=product['product_id']
         )
     
