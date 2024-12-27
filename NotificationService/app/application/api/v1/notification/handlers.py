@@ -1,4 +1,3 @@
-
 from fastapi import APIRouter, Depends, HTTPException, status
 
 from logic.queries.notification import GetLimitNotificationsQuery, GetUnreadNotificationsQuery
